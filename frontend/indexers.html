@@ -1,0 +1,2283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#0d1117" />
+<meta name="description" content="AI Powered Digital Forensics & Investigation Platform" />
+<link rel="manifest" href='data:application/manifest+json,{"name":"AI Digital Forensics","short_name":"DFI Platform","start_url":".","display":"standalone","background_color":"%230d1117","theme_color":"%230d1117","icons":[{"src":"data:image/svg%2Bxml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 192 192%27%3E%3Crect width=%27192%27 height=%27192%27 rx=%2732%27 fill=%27%230d1117%27/%3E%3Ccircle cx=%2796%27 cy=%2796%27 r=%2764%27 fill=%27none%27 stroke=%27%232f81f7%27 stroke-width=%278%27/%3E%3Ccircle cx=%2796%27 cy=%2796%27 r=%2716%27 fill=%27%232f81f7%27/%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}' />
+<title>AI Digital Forensics &amp; Investigation Platform</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2129; --border:#30363d;
+    --text:#e6edf3; --muted:#8b949e; --accent:#2f81f7; --accent2:#58a6ff;
+    --high:#f85149; --med:#d29922; --low:#3fb950; --info:#58a6ff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+  .screen{display:none} .screen.active{display:block}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:6px;
+         padding:9px 16px;font-size:14px;font-weight:600;transition:.15s}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--accent2)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+  .btn-ghost:hover{background:var(--panel2)}
+  .btn-danger{background:transparent;color:var(--high);border:1px solid rgba(248,81,73,.45)}
+  .btn-danger:hover{background:rgba(248,81,73,.12)}
+  .btn-link{background:transparent;color:var(--accent);text-decoration:none;font-weight:600;padding:0;border:none}
+  .btn-link:hover{text-decoration:underline}
+  input,textarea,select{font-family:inherit;font-size:14px;background:var(--panel2);
+    color:var(--text);border:1px solid var(--border);border-radius:6px;padding:9px 12px;width:100%}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;font-weight:600;
+        text-transform:uppercase;letter-spacing:.04em}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px}
+
+  #login-screen{min-height:100vh;display:none;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 30% 20%,#12233f 0%,#0d1117 60%)}
+  #login-screen.active{display:flex}
+  .login-box{width:420px;padding:32px}
+  .login-box h1{font-size:20px;margin-bottom:4px}
+  .login-box .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+  .auth-tabs{display:flex;gap:0;margin-bottom:18px;border-bottom:1px solid var(--border)}
+  .auth-tab{flex:1;padding:10px;background:transparent;border:none;color:var(--muted);
+    font-weight:600;font-size:13.5px;border-bottom:2px solid transparent;cursor:pointer;border-radius:0}
+  .auth-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .login-error{color:var(--high);font-size:13px;margin-top:10px;min-height:18px}
+  .login-success{color:var(--low);font-size:13px;margin-top:10px;min-height:18px}
+  .creds-hint{margin-top:16px;padding:10px;background:var(--panel2);border-radius:6px;
+    font-size:12px;color:var(--muted);border-left:3px solid var(--accent)}
+
+  header{display:none;align-items:center;justify-content:space-between;padding:12px 24px;
+    background:var(--panel);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+  #app.active header{display:flex}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 10px var(--accent)}
+  .user-chip{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+  .layout{display:none;min-height:calc(100vh - 57px)}
+  #app.active .layout{display:flex}
+  aside{width:230px;background:var(--panel);border-right:1px solid var(--border);padding:16px 10px;flex-shrink:0}
+  aside a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;
+    color:var(--muted);text-decoration:none;font-size:13.5px;font-weight:600;margin-bottom:2px;cursor:pointer}
+  aside a:hover{background:var(--panel2);color:var(--text)}
+  aside a.active{background:var(--accent);color:#fff}
+  main{flex:1;padding:24px 32px;max-width:1400px;overflow-x:hidden}
+
+  h2.page-title{font-size:22px;margin-bottom:4px}
+  .page-sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:24px}
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px}
+  .stat .num{font-size:28px;font-weight:700}
+  .stat .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{text-align:left;padding:10px 12px;border-bottom:1px solid var(--border);
+     color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+  td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tr:hover td{background:var(--panel2)}
+  .clickable{cursor:pointer}
+
+  .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;
+         text-transform:uppercase;letter-spacing:.04em}
+  .b-high{background:rgba(248,81,73,.15);color:var(--high);border:1px solid rgba(248,81,73,.4)}
+  .b-med {background:rgba(210,153,34,.15);color:var(--med);border:1px solid rgba(210,153,34,.4)}
+  .b-low {background:rgba(63,185,80,.15);color:var(--low);border:1px solid rgba(63,185,80,.4)}
+  .b-info{background:rgba(88,166,255,.15);color:var(--info);border:1px solid rgba(88,166,255,.4)}
+
+  .risk-bar{height:6px;border-radius:3px;background:var(--panel2);overflow:hidden;margin-top:4px}
+  .risk-fill{height:100%}
+
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;
+    align-items:flex-start;justify-content:center;z-index:100;padding:24px;overflow-y:auto}
+  .overlay.active{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+    width:100%;max-width:820px;max-height:none;padding:26px;margin:20px 0}
+  .modal h3{font-size:18px;margin-bottom:16px}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+
+  .finding{border-left:3px solid var(--border);padding:12px 15px;margin-bottom:10px;
+    background:var(--panel2);border-radius:0 6px 6px 0}
+  .finding.high{border-left-color:var(--high)}
+  .finding.medium{border-left-color:var(--med)}
+  .finding.low{border-left-color:var(--low)}
+  .finding .t{font-weight:700;font-size:13.5px;margin-bottom:5px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .finding .pts{font-size:11px;font-weight:600;background:var(--panel);padding:1px 8px;border-radius:10px;color:var(--muted);flex-shrink:0}
+  .finding .d{color:var(--muted);font-size:13px;line-height:1.55}
+  .finding .ev{margin-top:8px;background:#0a0e13;border:1px solid #20262e;border-radius:6px;
+    padding:9px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;
+    color:#c9d1d9;overflow-x:auto;white-space:pre-wrap;word-break:break-all;line-height:1.55}
+  .finding .ev mark{background:rgba(248,81,73,.35);color:#ffd7d5;padding:1px 3px;border-radius:3px;
+    border:1px solid rgba(248,81,73,.5)}
+  .finding.medium .ev mark{background:rgba(210,153,34,.3);color:#ffe6b3;border-color:rgba(210,153,34,.5)}
+  .finding.low .ev mark{background:rgba(63,185,80,.25);color:#c3f0ca;border-color:rgba(63,185,80,.5)}
+
+  .kv{display:grid;grid-template-columns:190px 1fr;gap:6px 14px;font-size:13.5px;margin:10px 0}
+  .kv .k{color:var(--muted)}
+  .kv .v{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;word-break:break-all}
+
+  .empty{color:var(--muted);text-align:center;padding:44px;font-size:14px}
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--panel);border:1px solid var(--border);
+    border-left:4px solid var(--accent);padding:13px 18px;border-radius:8px;z-index:200;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);font-size:13.5px;display:none;max-width:400px}
+  .toast.show{display:block;animation:slide .3s}
+  @keyframes slide{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+  .sec-title{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);
+    margin:22px 0 10px;font-weight:700}
+  code{background:var(--panel2);padding:1px 6px;border-radius:4px;font-size:12.5px}
+  .row-flex{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .spacer{flex:1}
+  .score-bar{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);margin-top:4px}
+  .score-bar .track{flex:1;height:4px;background:var(--panel2);border-radius:2px;overflow:hidden}
+  .score-bar .fill{height:100%;background:var(--high)}
+  .install-banner{background:linear-gradient(90deg,rgba(47,129,247,.15),transparent);
+    border:1px solid rgba(47,129,247,.4);border-radius:8px;padding:12px 16px;
+    display:flex;align-items:center;gap:12px;margin-bottom:20px;font-size:13.5px}
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN / REGISTER ==================== -->
+<div id="login-screen" class="screen active">
+  <div class="card login-box">
+    <h1>AI Digital Forensics</h1>
+    <div class="sub">Investigation Platform &mdash; v1.0</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" type="button">Sign In</button>
+      <button class="auth-tab" id="tab-register" type="button">Register</button>
+    </div>
+
+    <!-- Sign-in form -->
+    <form id="login-form" autocomplete="off">
+      <label>Investigator ID</label>
+      <input id="login-user" autocomplete="username" placeholder="e.g. investigator" />
+      <label>Password</label>
+      <input id="login-pass" type="password" autocomplete="current-password" placeholder="........" />
+      <div class="login-error" id="login-error"></div>
+      <button class="btn-primary" style="width:100%;margin-top:8px" type="submit">Authenticate</button>
+    </form>
+
+    <!-- Register form -->
+    <form id="register-form" autocomplete="off" style="display:none">
+      <label>Investigator ID</label>
+      <input id="reg-user" placeholder="Choose a unique ID (4-32 chars)" />
+      <label>Full Name</label>
+      <input id="reg-name" placeholder="e.g. Jane Doe" />
+      <label>Password</label>
+      <input id="reg-pass" type="password" placeholder="Minimum 6 characters" />
+      <label>Confirm Password</label>
+      <input id="reg-pass2" type="password" placeholder="Re-enter password" />
+      <div class="login-error" id="reg-error"></div>
+      <div class="login-success" id="reg-success"></div>
+      <button class="btn-primary" style="width:100%;margin-top:8px" type="submit">Create Account</button>
+    </form>
+
+    <div class="creds-hint">
+      <b>Demo credentials:</b> ID: <code>investigator</code> &middot; Password: <code>Admin@123</code>
+      <div id="storage-status" style="margin-top:10px;font-size:11.5px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== APPLICATION ==================== -->
+<div id="app" class="screen">
+  <header>
+    <div class="brand"><span class="dot"></span> AI Digital Forensics &amp; Investigation Platform</div>
+    <div class="user-chip">
+      <span id="hdr-user"></span>
+      <button class="btn-ghost" id="logout-btn">Sign out</button>
+    </div>
+  </header>
+  <div class="layout">
+    <aside>
+      <a data-route="dashboard">Dashboard</a>
+      <a data-route="cases">Cases</a>
+      <a data-route="reports">Reports</a>
+      <a data-route="trace">SRS Traceability</a>
+    </aside>
+    <main id="main"></main>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+console.log('[DFI] Script starting...');
+
+/* --------------------------- CONFIG --------------------------- */
+var CONFIG = {
+  MAX_LOGIN_ATTEMPTS: 5,
+  MAX_UPLOAD_MB: 25,
+  SESSION_KEY: 'dfi_session',
+  LOCK_KEY: 'dfi_lock'
+};
+
+/* --------------------- SAFE STORAGE --------------------------- */
+var MemStore = {};
+var HAS_LS = (function(){ try{ localStorage.setItem('__t','1'); localStorage.removeItem('__t'); return true; } catch(e){ return false; } })();
+var HAS_SS = (function(){ try{ sessionStorage.setItem('__t','1'); sessionStorage.removeItem('__t'); return true; } catch(e){ return false; } })();
+var Store = {
+  get:function(k){ if(HAS_LS){ try{ return localStorage.getItem(k); }catch(e){} } return MemStore[k]!==undefined?MemStore[k]:null; },
+  set:function(k,v){ if(HAS_LS){ try{ localStorage.setItem(k,v); return; }catch(e){} } MemStore[k]=v; },
+  remove:function(k){ if(HAS_LS){ try{ localStorage.removeItem(k); }catch(e){} } delete MemStore[k]; }
+};
+var Session = {
+  get:function(k){ if(HAS_SS){ try{ return sessionStorage.getItem(k); }catch(e){} } return MemStore['__s__'+k]!==undefined?MemStore['__s__'+k]:null; },
+  set:function(k,v){ if(HAS_SS){ try{ sessionStorage.setItem(k,v); return; }catch(e){} } MemStore['__s__'+k]=v; },
+  remove:function(k){ if(HAS_SS){ try{ sessionStorage.removeItem(k); }catch(e){} } delete MemStore['__s__'+k]; }
+};
+
+/* ---------------------------- D1-D5 --------------------------- */
+var DB = {
+  read:function(k){ try{ var r=Store.get(k); if(!r) return []; var v=JSON.parse(r); return Array.isArray(v)?v:[]; }catch(e){ return []; } },
+  write:function(k,v){ try{ Store.set(k, JSON.stringify(v)); }catch(e){} },
+  users:function(){return this.read('d1_users')}, saveUsers:function(v){this.write('d1_users',v)},
+  cases:function(){return this.read('d2_cases')}, saveCases:function(v){this.write('d2_cases',v)},
+  evidence:function(){return this.read('d3_evidence')}, saveEvidence:function(v){this.write('d3_evidence',v)},
+  analysis:function(){return this.read('d4_analysis')}, saveAnalysis:function(v){this.write('d4_analysis',v)},
+  reports:function(){return this.read('d5_reports')}, saveReports:function(v){this.write('d5_reports',v)}
+};
+function uid(p){ return p+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+
+/* ---------------------------- HASHING ------------------------- */
+function quickHash(str){
+  var h = 5381, i = str.length;
+  while(i) h = (h*33) ^ str.charCodeAt(--i);
+  return (h>>>0).toString(36);
+}
+function fullHash(s){ return quickHash('a|'+s) + quickHash('b|'+s); }
+
+/* ------------------------- AUTHENTICATION --------------------- */
+var Auth = {
+  seed: function(){
+    try {
+      if(!DB.users().length){
+        DB.saveUsers([{ id:'U-001', username:'investigator',
+          passwordHash: fullHash('Admin@123'), name:'Investigator', role:'Investigator',
+          created:new Date().toISOString() }]);
+        console.log('[DFI] Seeded default user.');
+      }
+    } catch(e){ console.error('[DFI] Seed failed:', e); }
+  },
+  current: function(){ try{ var r=Session.get(CONFIG.SESSION_KEY); return r?JSON.parse(r):null; }catch(e){ return null; } },
+  login: function(username, password){
+    username = String(username||'').trim(); password = String(password||'');
+    if(!username || !password) return { ok:false, msg:'Please enter both ID and password.' };
+    var lock = {};
+    try{ lock = JSON.parse(Store.get(CONFIG.LOCK_KEY) || '{}'); }catch(e){ lock = {}; }
+    if(lock[username] && lock[username].until > Date.now()){
+      var secs = Math.ceil((lock[username].until - Date.now())/1000);
+      return { ok:false, msg:'Account locked. Try again in ' + secs + 's.' };
+    }
+    var users = DB.users(), user = null;
+    var ph = fullHash(password);
+    for(var i=0; i<users.length; i++) if(users[i].username === username && users[i].passwordHash === ph){ user = users[i]; break; }
+    if(user){
+      try{ delete lock[username]; Store.set(CONFIG.LOCK_KEY, JSON.stringify(lock)); }catch(e){}
+      try{ Session.set(CONFIG.SESSION_KEY, JSON.stringify(user)); }catch(e){}
+      return { ok:true, user:user };
+    }
+    if(!lock[username]) lock[username] = { fails:0, until:0 };
+    lock[username].fails = (lock[username].fails || 0) + 1;
+    if(lock[username].fails >= CONFIG.MAX_LOGIN_ATTEMPTS){
+      lock[username].until = Date.now() + 30000; lock[username].fails = 0;
+    }
+    try{ Store.set(CONFIG.LOCK_KEY, JSON.stringify(lock)); }catch(e){}
+    return { ok:false, msg:'Invalid credentials.' };
+  },
+  register: function(username, name, password, password2){
+    username = String(username||'').trim();
+    name = String(name||'').trim();
+    if(!username || username.length < 4 || username.length > 32) return { ok:false, msg:'Investigator ID must be 4-32 characters.' };
+    if(!/^[a-zA-Z0-9_.-]+$/.test(username)) return { ok:false, msg:'ID may only contain letters, digits, dot, dash, underscore.' };
+    if(!name || name.length < 2) return { ok:false, msg:'Please enter your full name.' };
+    if(!password || password.length < 6) return { ok:false, msg:'Password must be at least 6 characters.' };
+    if(password !== password2) return { ok:false, msg:'Passwords do not match.' };
+    var users = DB.users();
+    for(var i=0; i<users.length; i++) if(users[i].username.toLowerCase() === username.toLowerCase()){
+      return { ok:false, msg:'That Investigator ID is already registered.' };
+    }
+    var user = {
+      id: 'U-' + String(users.length + 1).padStart(3,'0'),
+      username: username, name: name,
+      passwordHash: fullHash(password), role: 'Investigator',
+      created: new Date().toISOString()
+    };
+    users.push(user); DB.saveUsers(users);
+    return { ok:true, user:user };
+  },
+  logout: function(){ try{ Session.remove(CONFIG.SESSION_KEY); }catch(e){} }
+};
+
+/* ======================== THREAT INTEL ====================== */
+var INTEL = {
+  blacklistDomains: ['malware-test.com','evil-c2.net','phish-login.tk','badhost.ru','free-robux.xyz',
+    'suspicious-domain.tk','paypal-security-alert.com','microsoft-verify.info','apple-id-locked.tk',
+    'amazon-billing-problem.xyz','netflix-payment-update.top','facebook-security.tk',
+    'google-verify-account.ga','bankofamerica-alert.tk','whatsapp-verify.ml','crypto-giveaway.com',
+    'wallstreetbets-crypto.xyz','metamask-verify.com','opensea-airdrop.xyz','uniswap-rewards.top'],
+  suspiciousTLDs: ['.tk','.ml','.ga','.cf','.gq','.top','.xyz','.click','.country','.work','.loan',
+    '.review','.stream','.download','.racing','.party','.gdn','.bid','.accountant','.win','.men','.date','.faith'],
+  shorteners: ['bit.ly','tinyurl.com','goo.gl','t.co','ow.ly','is.gd','buff.ly','rebrand.ly','cutt.ly','rb.gy'],
+  brandNames: ['google','facebook','paypal','apple','microsoft','amazon','netflix','whatsapp','instagram',
+    'linkedin','twitter','bankofamerica','wellsfargo','chase','citibank','dropbox','adobe','github','steam',
+    'metamask','coinbase','binance','opensea','roblox','discord','telegram','dhl','fedex','usps'],
+  urlPhishingKeywords: ['login','signin','sign-in','verify','verification','account','update','secure',
+    'banking','confirm','password','wallet','recovery','unlock','billing','payment','authorize','validate',
+    'alert','suspended','locked','restricted','unusual'],
+  maliciousFileKeywords: ['mimikatz','powershell -enc','powershell -e ','invoke-expression','iex(',
+    'meterpreter','reverse shell','keylogger','ransomware','wannacry','nc -e','cmd.exe /c','cmd.exe /k',
+    '/etc/shadow','base64 -d','curl http','wget http','psexec','procdump','netcat','nc.exe','ncat',
+    'mshta http','regsvr32 /s /u /i','rundll32 javascript','certutil -urlcache','bitsadmin /transfer',
+    'vssadmin delete shadows','bcdedit /set','wbadmin delete','wevtutil cl'],
+  malwareFamilies: ['mimikatz','meterpreter','cobaltstrike','cobalt strike','njrat','quasar','darkcomet',
+    'remcos','nanocore','agenttesla','emotet','trickbot','ryuk','conti','revil','lockbit','blackcat',
+    'hawkeye','lokibot','formbook','azorult','raccoon','vidar','gandcrab','darkside','petya','wannacry',
+    'notpetya','badrabbit','avaddon','dearcry','teslacrypt','cerber','phobos','dharma','qakbot','icedid'],
+  suspiciousCommands: [
+    ['cmd.exe /c', 'Executes a command via Windows cmd.exe — the standard way malware launches shell commands.'],
+    ['cmd.exe /k', 'Opens a persistent cmd.exe session — used by reverse shells.'],
+    ['powershell',  'Invokes PowerShell — the most common scripting engine abused by malware (fileless attacks, downloaders, RATs).'],
+    ['wscript',     'Windows Script Host — abused to execute VBS/JS payloads (IcedID, Emotet, Qakbot).'],
+    ['cscript',     'Runs scripts via Windows Script Host — same abuse pattern as wscript.'],
+    ['mshta',       'HTML Application host — a "living off the land" technique to run remote HTA payloads.'],
+    ['regsvr32',    'Registers a DLL — abused to bypass AppLocker and execute remote scripts (Squiblydoo attack).'],
+    ['rundll32',    'Runs a DLL export — abused to execute malicious DLLs and JavaScript via URL.'],
+    ['certutil',    'Windows certificate tool — heavily abused to download files and decode base64 (certutil -urlcache).'],
+    ['bitsadmin',   'Background transfer service — abused to download payloads while evading network rules.'],
+    ['net user',    'Enumerates or creates local user accounts — a common post-exploitation step.'],
+    ['net localgroup','Modifies local groups — used to escalate a compromised user to administrator.'],
+    ['schtasks',    'Creates scheduled tasks — a standard persistence mechanism.'],
+    ['vssadmin delete shadows','Deletes volume shadow copies — signature first step of ransomware.'],
+    ['bcdedit /set','Modifies boot configuration — used to disable Windows recovery.'],
+    ['wevtutil cl', 'Clears Windows event logs — used to destroy forensic evidence.']
+  ]
+};
+
+var HIGH_RISK_EXT = ['exe','dll','scr','bat','cmd','vbs','vbe','ps1','psm1','js','jse','jar','msi','hta','wsf','cpl','reg','lnk','pif','com','gadget','sys','drv','ocx'];
+var MED_RISK_EXT  = ['docm','xlsm','pptm','dotm','xlam','zip','rar','7z','iso','img','vhd','apk','dmg','cab','ace'];
+var IMAGE_EXT     = ['jpg','jpeg','png','gif','bmp','webp','tiff','tif'];
+var MAGIC = [
+  {exts:['jpg','jpeg'], type:'JPEG image',        sig:[0xFF,0xD8,0xFF]},
+  {exts:['png'],        type:'PNG image',         sig:[0x89,0x50,0x4E,0x47]},
+  {exts:['gif'],        type:'GIF image',         sig:[0x47,0x49,0x46,0x38]},
+  {exts:['pdf'],        type:'PDF document',      sig:[0x25,0x50,0x44,0x46]},
+  {exts:['zip','docx','xlsx','pptx','jar','apk','odt'], type:'ZIP archive', sig:[0x50,0x4B,0x03,0x04]},
+  {exts:['exe','dll','sys','scr','ocx'], type:'Windows PE binary', sig:[0x4D,0x5A]},
+  {exts:['rar'],        type:'RAR archive',       sig:[0x52,0x61,0x72,0x21]},
+  {exts:['7z'],        type:'7-Zip archive',     sig:[0x37,0x7A,0xBC,0xAF]},
+  {exts:['bmp'],        type:'BMP image',         sig:[0x42,0x4D]},
+  {exts:['tiff','tif'], type:'TIFF image',        sig:[0x49,0x49,0x2A,0x00]},
+  {exts:['elf'],        type:'ELF binary',        sig:[0x7F,0x45,0x4C,0x46]}
+];
+
+/* =========================== HELPERS ========================= */
+function detectMagic(bytes){
+  for(var i=0;i<MAGIC.length;i++){
+    var m=MAGIC[i], ok=true;
+    for(var j=0;j<m.sig.length;j++) if(bytes[j]!==m.sig[j]){ ok=false; break; }
+    if(ok) return m;
+  }
+  return null;
+}
+function entropy(bytes){
+  if(!bytes || !bytes.length) return 0;
+  var freq=new Array(256); for(var i=0;i<256;i++) freq[i]=0;
+  for(var k=0;k<bytes.length;k++) freq[bytes[k]]++;
+  var H=0, len=bytes.length;
+  for(var f=0;f<256;f++){ if(!freq[f]) continue; var p=freq[f]/len; H-=p*Math.log(p)/Math.LN2; }
+  return H;
+}
+function stringEntropy(s){
+  if(!s) return 0;
+  var freq={}, i;
+  for(i=0;i<s.length;i++){ var c=s[i]; freq[c]=(freq[c]||0)+1; }
+  var H=0;
+  for(var k in freq){ var p=freq[k]/s.length; H-=p*Math.log(p)/Math.LN2; }
+  return H;
+}
+function levenshtein(a, b){
+  var m=a.length, n=b.length;
+  if(Math.abs(m-n) > 2) return 99;
+  var dp=[], i, j;
+  for(i=0;i<=m;i++) dp[i]=[i];
+  for(j=0;j<=n;j++) dp[0][j]=j;
+  for(i=1;i<=m;i++){
+    for(j=1;j<=n;j++){
+      var cost = a[i-1]===b[j-1] ? 0 : 1;
+      dp[i][j]=Math.min(dp[i-1][j]+1, dp[i][j-1]+1, dp[i-1][j-1]+cost);
+    }
+  }
+  return dp[m][n];
+}
+function extractStrings(bytes, minLen){
+  minLen = minLen || 5;
+  var out=[], cur='';
+  var max = Math.min(bytes.length, 2000000);
+  for(var i=0;i<max;i++){
+    var b=bytes[i];
+    if(b>=32 && b<=126) cur+=String.fromCharCode(b);
+    else { if(cur.length>=minLen) out.push(cur); cur=''; }
+  }
+  if(cur.length>=minLen) out.push(cur);
+  return out;
+}
+function extractUrls(str){
+  var re=/https?:\/\/[^\s"'<>)\]]+/gi, m=str.match(re)||[], out=[], seen={};
+  for(var i=0;i<m.length;i++) if(!seen[m[i]]){ seen[m[i]]=true; out.push(m[i]); }
+  return out;
+}
+function findSnippet(haystack, needle, windowSize){
+  if(!haystack || !needle) return null;
+  windowSize = windowSize || 40;
+  var idx = haystack.toLowerCase().indexOf(String(needle).toLowerCase());
+  if(idx < 0) return null;
+  var start = Math.max(0, idx - Math.floor(windowSize/2));
+  var end = Math.min(haystack.length, idx + needle.length + Math.floor(windowSize/2));
+  return { before: haystack.slice(start, idx), match: haystack.slice(idx, idx + needle.length), after: haystack.slice(idx + needle.length, end) };
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
+function renderSnippet(sn){
+  if(!sn) return '';
+  return esc(sn.before) + '<mark>' + esc(sn.match) + '</mark>' + esc(sn.after);
+}
+function humanSize(b){
+  if(b < 1024) return b + ' B';
+  if(b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(2) + ' MB';
+}
+function fmtDate(iso){ try{ return new Date(iso).toLocaleString(); }catch(e){ return iso; } }
+function isTextLike(bytes){
+  var n = Math.min(bytes.length, 512); if(!n) return false;
+  var printable = 0;
+  for(var i=0;i<n;i++){ var b=bytes[i]; if(b===0) return false; if((b>=32&&b<=126)||b===9||b===10||b===13) printable++; }
+  return printable / n > 0.85;
+}
+
+/* ============================ PE PARSER ======================= */
+function parsePE(bytes){
+  if(bytes.length < 64) return null;
+  if(bytes[0]!==0x4D || bytes[1]!==0x5A) return null;
+  var peOffset = bytes[0x3C] | (bytes[0x3D]<<8) | (bytes[0x3E]<<16) | (bytes[0x3F]<<24);
+  if(peOffset <= 0 || peOffset + 24 > bytes.length) return null;
+  if(bytes[peOffset]!==0x50 || bytes[peOffset+1]!==0x45) return null;
+  var machine = bytes[peOffset+4] | (bytes[peOffset+5]<<8);
+  var numSections = bytes[peOffset+6] | (bytes[peOffset+7]<<8);
+  var timestamp = (bytes[peOffset+8] | (bytes[peOffset+9]<<8) | (bytes[peOffset+10]<<16) | (bytes[peOffset+11]<<24)) >>> 0;
+  var optHeaderSize = bytes[peOffset+20] | (bytes[peOffset+21]<<8);
+  var optStart = peOffset + 24;
+  if(optStart + 2 > bytes.length) return null;
+  var magic = bytes[optStart] | (bytes[optStart+1]<<8);
+  var pe32plus = (magic === 0x20B);
+  var entryPoint = (bytes[optStart+16] | (bytes[optStart+17]<<8) | (bytes[optStart+18]<<16) | (bytes[optStart+19]<<24)) >>> 0;
+  var sections = [];
+  var sectStart = optStart + optHeaderSize;
+  for(var i=0;i<numSections;i++){
+    var off = sectStart + i*40;
+    if(off + 40 > bytes.length) break;
+    var name='';
+    for(var j=0;j<8;j++){ if(bytes[off+j]===0) break; name+=String.fromCharCode(bytes[off+j]); }
+    sections.push({
+      name: name,
+      virtualSize: (bytes[off+8] | (bytes[off+9]<<8) | (bytes[off+10]<<16) | (bytes[off+11]<<24))>>>0,
+      virtualAddress: (bytes[off+12]| (bytes[off+13]<<8)| (bytes[off+14]<<16)| (bytes[off+15]<<24))>>>0,
+      sizeOfRawData: (bytes[off+16]| (bytes[off+17]<<8)| (bytes[off+18]<<16)| (bytes[off+19]<<24))>>>0,
+      pointerToRawData: (bytes[off+20]| (bytes[off+21]<<8)| (bytes[off+22]<<16)| (bytes[off+23]<<24))>>>0,
+      characteristics: (bytes[off+36]| (bytes[off+37]<<8)| (bytes[off+38]<<16)| (bytes[off+39]<<24))>>>0
+    });
+  }
+  return { machine:machine, numSections:numSections, timestamp:timestamp, pe32plus:pe32plus,
+           entryPoint:entryPoint, sections:sections };
+}
+
+/* ==================== FILE ANALYSIS ========================= */
+function mkFinding(sev, title, detail, pts, snippet){
+  var f = { severity:sev, title:title, detail:detail, points:pts||0 };
+  if(snippet) f.snippet = snippet;
+  return f;
+}
+
+function analyzeFile(name, size, bytes, text){
+  var findings=[], score=0;
+  var ext = (name.split('.').pop() || '').toLowerCase();
+  var nameLower = name.toLowerCase();
+
+  // 1) Extension risk
+  if(HIGH_RISK_EXT.indexOf(ext) >= 0){
+    score += 15;
+    findings.push(mkFinding('high',
+      'Executable file type: .' + ext,
+      '.' + ext + ' files contain machine code that runs directly on the host. This is the primary delivery format ' +
+      'for malware, ransomware and remote-access trojans. Legitimate business documents almost never use this extension.',
+      15, {before:'name: ', match:'.'+ext, after:''}));
+  } else if(MED_RISK_EXT.indexOf(ext) >= 0){
+    score += 8;
+    findings.push(mkFinding('medium',
+      'Macro-capable / archive file type: .' + ext,
+      '.' + ext + ' files can carry executable macros, scripts, or nested archives. Office macro documents ' +
+      '(docm/xlsm) are one of the most common initial-access vectors used by ransomware operators.',
+      8, {before:'name: ', match:'.'+ext, after:''}));
+  }
+
+  // 2) Double extension trick
+  if(/\.(jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx|txt|mp3|mp4)\.(exe|scr|bat|cmd|vbs|ps1|js|jar|msi|hta|com|pif)$/i.test(name)){
+    score += 40;
+    findings.push(mkFinding('high',
+      'Double-extension masquerade',
+      'The filename ends in a legitimate-looking extension (' + (nameLower.match(/\.(jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx|txt|mp3|mp4)/i)||[''])[0] + ') ' +
+      'followed by an executable extension. Windows hides the real extension by default in Explorer, so the victim ' +
+      'sees only the fake one. This is a classic malware distribution trick.',
+      40, {before:'name: ', match:name, after:''}));
+  }
+
+  // 3) Right-to-left override
+  if(/\u202E/.test(name)){
+    score += 45;
+    findings.push(mkFinding('high',
+      'Right-to-left override character in filename',
+      'The filename contains Unicode U+202E (RIGHT-TO-LEFT OVERRIDE). This reverses how the filename displays — ' +
+      'e.g. "photo_\\u202Egnp.exe" is displayed as "photo_exe.png". Extremely strong malware indicator.',
+      45, {before:'name: ', match:name, after:''}));
+  }
+
+  // 4) Magic byte mismatch
+  var magic = detectMagic(bytes);
+  if(magic && ext && magic.exts.indexOf(ext) < 0){
+    score += 30;
+    findings.push(mkFinding('high',
+      'File type masquerading — signature mismatch',
+      'The filename claims to be .' + ext + ', but the internal file signature matches "' + magic.type + '". ' +
+      'Renaming a file to hide its true type is a classic technique used to bypass extension-based filters and ' +
+      'to trick the user into opening an executable (e.g. "invoice.pdf.exe" or a PE binary renamed to .jpg).',
+      30, {before:'detected bytes: ', match: magic.sig.map(function(b){ return ('0'+b.toString(16).toUpperCase()).slice(-2); }).join(' '), after:'  (expected for .'+ext+')'}));
+  }
+
+  // 5) PE analysis
+  if(bytes.length > 64 && bytes[0]===0x4D && bytes[1]===0x5A){
+    var peResult = analyzePE(bytes);
+    for(var i=0;i<peResult.findings.length;i++){ findings.push(peResult.findings[i]); score += peResult.findings[i].points || 0; }
+  }
+
+  // 6) Image steg
+  if(IMAGE_EXT.indexOf(ext) >= 0){
+    var imgResult = analyzeImageSteg(bytes, ext);
+    for(var k=0;k<imgResult.findings.length;k++){ findings.push(imgResult.findings[k]); score += imgResult.findings[k].points || 0; }
+  }
+
+  // 7) Text / strings
+  if(text){
+    var txtResult = analyzeTextContent(text, ext, false);
+    for(var t=0;t<txtResult.findings.length;t++){ findings.push(txtResult.findings[t]); score += txtResult.findings[t].points || 0; }
+  } else if(bytes.length > 100 && IMAGE_EXT.indexOf(ext) < 0 && !(bytes[0]===0x4D && bytes[1]===0x5A)){
+    var strings = extractStrings(bytes, 6);
+    var joined = strings.join('\n');
+    var binResult = analyzeTextContent(joined, ext, true);
+    for(var b=0;b<binResult.findings.length;b++){ findings.push(binResult.findings[b]); score += binResult.findings[b].points || 0; }
+  }
+
+  return { score: Math.min(score,100), findings:findings };
+}
+
+/* ---------------- PE deep analysis ---------------- */
+function analyzePE(bytes){
+  var findings=[], score=0;
+  var pe = null;
+  try { pe = parsePE(bytes); } catch(e){}
+  if(!pe){
+    findings.push(mkFinding('low', 'Malformed PE header',
+      'File begins with an MZ signature but the PE header could not be parsed. May indicate a DOS-only executable, ' +
+      'a corrupted file, or a deliberately malformed header used to confuse parsers.', 5));
+    return { findings:findings, score:5 };
+  }
+
+  var strings = extractStrings(bytes, 5);
+  var joined = strings.join('\n');
+  var lower = joined.toLowerCase();
+
+  // Timestamp
+  if(pe.timestamp > 0){
+    var compiled = new Date(pe.timestamp * 1000);
+    var ageDays = (Date.now() - compiled.getTime()) / 86400000;
+    if(ageDays < 30 && ageDays > 0){
+      score += 8;
+      findings.push(mkFinding('medium', 'Recently compiled binary',
+        'The PE header reports a compile timestamp of ' + compiled.toISOString().slice(0,10) + ' — only ' +
+        Math.round(ageDays) + ' days old. Freshly compiled binaries are typical of newly generated malware samples ' +
+        'built for a specific campaign.', 8));
+    }
+    if(compiled.getTime() > Date.now() || compiled.getFullYear() < 1995){
+      score += 10;
+      findings.push(mkFinding('medium', 'Anomalous compile timestamp',
+        'The compile timestamp decodes to ' + compiled.toISOString() + ', which is outside a plausible range. ' +
+        'Manipulating the timestamp ("timestomping") is an anti-forensic technique used by malware.', 10));
+    }
+  }
+
+  // Sections
+  var highEntropy = [], packerSection = null;
+  var packerNames = ['upx0','upx1','upx2','.aspack','.adata','.petite','.mpress1','.mpress2',
+                     '.themida','.vmp0','.vmp1','.enigma1','.enigma2','.packed','.pec1','.pec2'];
+  for(var s=0;s<pe.sections.length;s++){
+    var sect = pe.sections[s];
+    if(sect.sizeOfRawData === 0) continue;
+    var end = Math.min(sect.pointerToRawData + sect.sizeOfRawData, bytes.length);
+    var data = bytes.slice(sect.pointerToRawData, end);
+    if(data.length >= 256){
+      var ent = entropy(data);
+      if(ent > 7.4 && sect.name !== '.rsrc' && sect.name !== '.reloc'){
+        highEntropy.push({ name:sect.name, entropy:ent, size:sect.sizeOfRawData });
+      }
+    }
+    var lname = sect.name.toLowerCase().replace(/\s+/g,'');
+    if(packerNames.indexOf(lname) >= 0 && !packerSection) packerSection = sect.name;
+  }
+
+  if(packerSection){
+    score += 25;
+    findings.push(mkFinding('high', 'Known packer/protector section: "' + packerSection + '"',
+      'A section named "' + packerSection + '" matches a known executable packer or protector (UPX, ASPack, ' +
+      'Themida, VMProtect, Enigma, PECompact). Packers compress or encrypt the real code inside the file, hiding ' +
+      'it from signature-based antivirus. Legitimate software uses them occasionally, but the overwhelming ' +
+      'majority of packed binaries submitted for forensic analysis turn out to be malicious.',
+      25, {before:'section name: ', match: packerSection, after:'  (matches known packer)'}));
+  }
+  if(highEntropy.length > 0){
+    var top = highEntropy[0];
+    score += 20;
+    findings.push(mkFinding('high', 'High-entropy section: "' + top.name + '" (' + top.entropy.toFixed(2) + '/8.0)',
+      'Section "' + top.name + '" has a Shannon entropy of ' + top.entropy.toFixed(2) + ' bits/byte, very close to ' +
+      'the theoretical maximum of 8 (indicating essentially random bytes). Normal compiled code has entropy around ' +
+      '6.5. Entropy this high is a strong indicator that this section contains packed code, encrypted shellcode, ' +
+      'or an embedded payload that will be unpacked at runtime.',
+      20, {before:'section: ', match: top.name + '  entropy=' + top.entropy.toFixed(2), after:'  size=' + top.size + ' bytes'}));
+  }
+
+  // Process-injection chain
+  var hasWriteMemory = joined.indexOf('WriteProcessMemory') >= 0;
+  var hasRemoteThread = joined.indexOf('CreateRemoteThread') >= 0 || joined.indexOf('NtCreateThreadEx') >= 0;
+  var hasVirtualAllocEx = joined.indexOf('VirtualAllocEx') >= 0 || joined.indexOf('NtAllocateVirtualMemory') >= 0;
+  var hasOpenProcess = joined.indexOf('OpenProcess') >= 0;
+  if((hasWriteMemory && hasRemoteThread) || (hasVirtualAllocEx && hasWriteMemory)){
+    score += 40;
+    var chain = [];
+    if(hasOpenProcess) chain.push('OpenProcess');
+    if(hasVirtualAllocEx) chain.push('VirtualAllocEx');
+    if(hasWriteMemory) chain.push('WriteProcessMemory');
+    if(hasRemoteThread) chain.push('CreateRemoteThread');
+    findings.push(mkFinding('high', 'Process-injection API chain detected',
+      'The binary imports the classic process-injection API chain: ' + chain.join(' \u2192 ') + '. ' +
+      'This sequence lets the program allocate memory inside another running process, write attacker-supplied code ' +
+      'into it, and execute that code inside the host process. It is the single most common technique used by ' +
+      'malware to hide from endpoint protection, escalate into privileged processes, and inject payloads into ' +
+      'browsers or system services (used by Cobalt Strike, Meterpreter, and virtually every RAT).',
+      40, {before:'imported APIs: ', match: chain.join(' \u2192 '), after:''}));
+  }
+
+  // Download-and-execute
+  var hasUrlDownload = joined.indexOf('URLDownloadToFile') >= 0 || joined.indexOf('URLDownloadToCacheFile') >= 0 ||
+                       (joined.indexOf('InternetOpen') >= 0 && joined.indexOf('InternetReadFile') >= 0) ||
+                       (joined.indexOf('WinHttpOpen') >= 0 && joined.indexOf('WinHttpReadData') >= 0);
+  var hasExecute = joined.indexOf('WinExec') >= 0 || joined.indexOf('ShellExecute') >= 0 || joined.indexOf('CreateProcess') >= 0;
+  if(hasUrlDownload && hasExecute){
+    score += 35;
+    findings.push(mkFinding('high', 'Download-and-execute behaviour (dropper pattern)',
+      'Imports a network download API alongside a process-launch API. This combination is the signature of a ' +
+      '"dropper" or "downloader" — a small first-stage binary whose only job is to fetch a second-stage payload ' +
+      'from the internet and run it immediately. This is exactly how Emotet, TrickBot, SmokeLoader, QakBot, and ' +
+      'most banking trojans begin their infection chain.',
+      35, {before:'API combination: ', match: (joined.indexOf('URLDownloadToFile')>=0?'URLDownloadToFile':'InternetReadFile/WinHttpReadData') + ' + ' + (joined.indexOf('WinExec')>=0?'WinExec':joined.indexOf('ShellExecute')>=0?'ShellExecute':'CreateProcess'), after:''}));
+  } else if(hasUrlDownload){
+    score += 15;
+    findings.push(mkFinding('medium', 'Network download API present',
+      'Imports an API capable of retrieving files from remote servers (URLDownloadToFile / InternetReadFile / ' +
+      'WinHttpReadData). The binary can fetch additional payloads at runtime.', 15));
+  }
+
+  // Anti-debug
+  var antiDebugApis = ['IsDebuggerPresent','CheckRemoteDebuggerPresent','NtQueryInformationProcess','OutputDebugString','QueryPerformanceCounter'];
+  var antiDebugHits = [];
+  for(var ad=0;ad<antiDebugApis.length;ad++) if(joined.indexOf(antiDebugApis[ad]) >= 0) antiDebugHits.push(antiDebugApis[ad]);
+  if(antiDebugHits.length >= 2){
+    score += 15;
+    findings.push(mkFinding('medium', 'Anti-debugging techniques imported',
+      'Imports ' + antiDebugHits.join(', ') + '. These APIs detect when the binary is being analysed under a ' +
+      'debugger and change behaviour accordingly — a standard evasion technique used to hide malicious activity ' +
+      'during sandbox or analyst review.',
+      15, {before:'anti-debug APIs: ', match: antiDebugHits.join(', '), after:''}));
+  }
+
+  // Persistence
+  if(joined.indexOf('RegSetValue') >= 0 || joined.indexOf('RegCreateKey') >= 0 || joined.indexOf('RegSetValueEx') >= 0 || joined.indexOf('RegCreateKeyEx') >= 0){
+    if(lower.indexOf('currentversion\\run') >= 0 || lower.indexOf('currentversion\\\\run') >= 0){
+      score += 25;
+      findings.push(mkFinding('high', 'Registry auto-start persistence',
+        'References the Windows "Run" registry key (HKCU/HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run). ' +
+        'Writing to this key makes the program launch automatically at every user login. This is the single most ' +
+        'common persistence mechanism used by consumer malware.',
+        25, {before:'registry path: ', match:'CurrentVersion\\Run', after:''}));
+    }
+  }
+  if(joined.indexOf('CreateService') >= 0 || joined.indexOf('OpenSCManager') >= 0){
+    score += 20;
+    findings.push(mkFinding('high', 'Windows service persistence API',
+      'Imports service-control APIs (CreateService / OpenSCManager). Installing a Windows service is a persistence ' +
+      'technique used by rootkits and ransomware to survive reboots and run with SYSTEM privileges.', 20));
+  }
+  if(joined.indexOf('AdjustTokenPrivileges') >= 0 || joined.indexOf('LookupPrivilegeValue') >= 0 || joined.indexOf('OpenProcessToken') >= 0){
+    score += 15;
+    findings.push(mkFinding('medium', 'Privilege-elevation APIs imported',
+      'Uses token-manipulation APIs to enable or acquire elevated privileges (e.g. SeDebugPrivilege, ' +
+      'SeShutdownPrivilege). Legitimate consumer applications rarely need this capability.', 15));
+  }
+  if(joined.indexOf('CryptEncrypt') >= 0){
+    score += 20;
+    findings.push(mkFinding('high', 'File-encryption API imported (CryptEncrypt)',
+      'Imports CryptEncrypt, used by ransomware to encrypt files on the victim\'s machine. Combined with other ' +
+      'indicators this strongly suggests a ransomware payload.', 20));
+  }
+  if(joined.indexOf('GetAsyncKeyState') >= 0 || joined.indexOf('SetWindowsHookEx') >= 0){
+    score += 25;
+    findings.push(mkFinding('high', 'Keylogging APIs imported',
+      'Imports ' + (joined.indexOf('GetAsyncKeyState')>=0?'GetAsyncKeyState':'SetWindowsHookEx') +
+      ' — used to capture keystrokes for credential theft. This is a hallmark of keyloggers and info-stealers ' +
+      '(AgentTesla, HawkEye, LokiBot, Raccoon, Vidar, FormBook).',
+      25, {before:'keylogging API: ', match:(joined.indexOf('GetAsyncKeyState')>=0?'GetAsyncKeyState':'SetWindowsHookEx'), after:''}));
+  }
+
+  // Family
+  for(var mf=0; mf<INTEL.malwareFamilies.length; mf++){
+    var fam = INTEL.malwareFamilies[mf];
+    var sn = findSnippet(joined, fam, 60);
+    if(sn){
+      score += 40;
+      findings.push(mkFinding('high', 'Known malware family indicator: "' + fam + '"',
+        'The string "' + fam + '" appears inside the binary. This is a name, mutex, campaign tag, or user-agent ' +
+        'associated with a known malware family. Manual verification with a sandbox is strongly recommended.',
+        40, sn));
+      break;
+    }
+  }
+
+  // Commands
+  var cmdHits = 0;
+  for(var sc=0; sc<INTEL.suspiciousCommands.length; sc++){
+    var cmdSn = findSnippet(joined, INTEL.suspiciousCommands[sc][0], 60);
+    if(cmdSn){
+      cmdHits++;
+      if(cmdHits <= 4){
+        score += 12;
+        findings.push(mkFinding('high', 'Suspicious command reference: "' + INTEL.suspiciousCommands[sc][0] + '"',
+          INTEL.suspiciousCommands[sc][1], 12, cmdSn));
+      }
+    }
+  }
+
+  // URLs
+  var urls = extractUrls(joined);
+  for(var u=0; u<urls.length; u++){
+    var r = analyzeUrl(urls[u]);
+    if(r.score >= 35){
+      score += 20;
+      findings.push(mkFinding('high', 'Malicious URL embedded in binary',
+        'The URL "' + urls[u] + '" scored ' + r.score + '/100 on URL analysis (' + r.verdict + '). Hard-coded URLs ' +
+        'inside an executable are typical of malware C2 infrastructure and downloaders.',
+        20, {before:'embedded URL: ', match: urls[u], after:''}));
+      break;
+    }
+  }
+  var ipMatches = joined.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g) || [];
+  var publicIps = [];
+  for(var ip=0; ip<ipMatches.length; ip++){
+    var p = ipMatches[ip].split('.').map(Number);
+    if(p[0]===10 || p[0]===127 || (p[0]===192&&p[1]===168) || (p[0]===172&&p[1]>=16&&p[1]<=31)) continue;
+    if(publicIps.indexOf(ipMatches[ip]) < 0) publicIps.push(ipMatches[ip]);
+  }
+  if(publicIps.length > 0){
+    score += 15;
+    findings.push(mkFinding('medium', 'Hard-coded public IP address' + (publicIps.length>1?'es':''),
+      'The binary contains ' + publicIps.length + ' public IP address(es): ' + publicIps.slice(0,3).join(', ') + '. ' +
+      'Hard-coded IPs are a common way malware identifies C2 servers without relying on DNS, which is often blocked ' +
+      'or monitored.',
+      15, {before:'public IP: ', match: publicIps.slice(0,3).join(', '), after:''}));
+  }
+
+  return { findings:findings, score:Math.min(score,100) };
+}
+
+/* ---------------- Image steg ---------------- */
+function analyzeImageSteg(bytes, ext){
+  var findings=[], score=0;
+  if(ext === 'jpg' || ext === 'jpeg'){
+    if(bytes[0]!==0xFF || bytes[1]!==0xD8){
+      findings.push(mkFinding('low', 'Invalid JPEG header',
+        'The file does not begin with the standard JPEG Start-Of-Image marker (FFD8).', 5));
+      score += 5;
+    }
+    var soiCount = 0;
+    for(var i=0;i<bytes.length-1;i++) if(bytes[i]===0xFF && bytes[i+1]===0xD8) soiCount++;
+    if(soiCount > 1){
+      findings.push(mkFinding('high', 'Multiple JPEG start markers (' + soiCount + ')',
+        'A normal JPEG contains exactly one Start-Of-Image (FFD8) marker. Finding ' + soiCount + ' suggests one or ' +
+        'more images (or payloads) have been embedded inside this file — a classic steganographic technique used ' +
+        'by tools like steghide, outguess, and F5.',
+        25, {before:'SOI marker (FFD8) count: ', match: soiCount + ' occurrences', after:''}));
+      score += 25;
+    }
+    for(var j=bytes.length-2;j>0;j--){
+      if(bytes[j]===0xFF && bytes[j+1]===0xD9){
+        var trailing = bytes.length - (j+2);
+        if(trailing > 32){
+          findings.push(mkFinding('high', 'Data appended after JPEG EOI marker',
+            trailing + ' bytes of data found after the JPEG end-of-image (FFD9) marker. Standard JPEG decoders ' +
+            'ignore everything after FFD9, which makes this the single most common way to hide files inside images. ' +
+            'Tools like steghide, outguess, and "copy /b image.jpg+payload.zip image.jpg" produce exactly this pattern.',
+            35, {before:'EOI at offset ' + j + ', ', match: trailing + ' bytes of trailing data', after:''}));
+          score += 35;
+        } else if(trailing > 0){
+          findings.push(mkFinding('low', 'Minor trailing data after EOI',
+            trailing + ' bytes of data after the JPEG end marker — usually an embedded thumbnail or EXIF remnant.', 3));
+          score += 3;
+        }
+        break;
+      }
+    }
+  }
+
+  if(ext === 'png'){
+    var sig = [0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A];
+    var sigOk = true;
+    for(var s=0;s<8;s++) if(bytes[s]!==sig[s]){ sigOk=false; break; }
+    if(!sigOk){
+      findings.push(mkFinding('medium', 'Invalid PNG signature',
+        'File does not begin with the standard 8-byte PNG signature.', 10));
+      score += 10;
+    }
+    var offset = 8, chunks = [];
+    while(offset + 12 < bytes.length){
+      var len = (bytes[offset]<<24)|(bytes[offset+1]<<16)|(bytes[offset+2]<<8)|bytes[offset+3];
+      if(len < 0 || offset + 12 + len > bytes.length) break;
+      var ctype = String.fromCharCode(bytes[offset+4],bytes[offset+5],bytes[offset+6],bytes[offset+7]);
+      chunks.push({ type:ctype, length:len, offset:offset });
+      offset += 12 + len;
+      if(ctype === 'IEND') break;
+    }
+    if(offset < bytes.length - 4){
+      var pngTrail = bytes.length - offset;
+      if(pngTrail > 32){
+        findings.push(mkFinding('high', 'Data appended after PNG IEND chunk',
+          pngTrail + ' bytes of data after the PNG IEND (end-of-image) chunk. PNG decoders stop reading at IEND, ' +
+          'so this is a preferred hiding place for steganographic payloads and appended files.',
+          35, {before:'IEND at offset ' + offset + ', ', match: pngTrail + ' bytes of trailing data', after:''}));
+        score += 35;
+      }
+    }
+    var knownChunks = ['IHDR','PLTE','IDAT','IEND','tRNS','gAMA','cHRM','sRGB','iCCP','tEXt','zTXt','iTXt','bKGD','pHYs','sBIT','hIST','tIME','eXIf','sPLT'];
+    for(var c=0;c<chunks.length;c++){
+      if(knownChunks.indexOf(chunks[c].type) < 0 && chunks[c].type[2] === chunks[c].type[2].toLowerCase()){
+        findings.push(mkFinding('medium', 'Non-standard PNG chunk "' + chunks[c].type + '"',
+          'The PNG contains a private/ancillary chunk ("' + chunks[c].type + '", ' + chunks[c].length + ' bytes) ' +
+          'that is not part of the standard PNG specification. Private chunks are a common carrier for hidden data ' +
+          'in steganographic tools.',
+          15, {before:'chunk: ', match: chunks[c].type, after:'  (' + chunks[c].length + ' bytes)'}));
+        score += 15;
+      }
+    }
+  }
+
+  var embeddedSigs = [
+    {type:'MZ',  bytes:[0x4D,0x5A],          severity:'high',   score:35, label:'Windows PE executable (MZ)'},
+    {type:'ZIP', bytes:[0x50,0x4B,0x03,0x04], severity:'high',   score:25, label:'ZIP archive'},
+    {type:'PDF', bytes:[0x25,0x50,0x44,0x46], severity:'medium', score:15, label:'PDF document'},
+    {type:'ELF', bytes:[0x7F,0x45,0x4C,0x46], severity:'high',   score:30, label:'Linux ELF binary'}
+  ];
+  var found = {}, maxScan = Math.min(bytes.length - 8, 2000000);
+  for(var si=0; si<embeddedSigs.length; si++){
+    var sigDef = embeddedSigs[si];
+    for(var p=1; p<maxScan; p++){
+      var match = true;
+      for(var q=0;q<sigDef.bytes.length;q++) if(bytes[p+q]!==sigDef.bytes[q]){ match=false; break; }
+      if(match){
+        findings.push(mkFinding(sigDef.severity, 'Embedded ' + sigDef.label + ' detected',
+          'A ' + sigDef.label + ' signature was found at byte offset ' + p + ' inside the image — not at the start ' +
+          'of the file. This is a direct indication that an additional file (very likely malicious) has been ' +
+          'appended to or hidden within the image.',
+          sigDef.score, {before:'offset ' + p + ': ', match: sigDef.bytes.map(function(b){ return ('0'+b.toString(16).toUpperCase()).slice(-2); }).join(' '), after:'  (' + sigDef.label + ')'}));
+        score += sigDef.score;
+        found[sigDef.type] = true;
+        break;
+      }
+    }
+  }
+
+  var startByte = Math.floor(bytes.length * 0.1);
+  var endByte = Math.floor(bytes.length * 0.5);
+  if(endByte - startByte > 4096){
+    var ones = 0, total = 0;
+    var step = Math.max(1, Math.floor((endByte - startByte) / 65536));
+    for(var b=startByte; b<endByte; b+=step){ ones += bytes[b] & 1; total++; }
+    var ratio = ones / total;
+    if(ratio < 0.35 || ratio > 0.65){
+      findings.push(mkFinding('medium', 'LSB distribution anomaly',
+        'The least-significant bits in the image data are skewed (ratio = ' + (ratio*100).toFixed(1) + '%; natural ' +
+        'images average ~50%). This pattern indicates the LSBs have been overwritten with embedded data — the ' +
+        'classic signature of LSB-replacement steganography.',
+        20, {before:'LSB ones ratio: ', match:(ratio*100).toFixed(1) + '%', after:'  (natural ~50%)'}));
+      score += 20;
+    }
+  }
+  return { score: Math.min(score,100), findings:findings };
+}
+
+/* ---------------- Text content ---------------- */
+function analyzeTextContent(text, ext, isBinary){
+  var findings=[], score=0;
+  var lower = text.toLowerCase();
+
+  // Encoded PowerShell
+  var psMatch = text.match(/powershell\s+-e(nc|ncodedcommand)?\s+[A-Za-z0-9+\/=]{40,}/i);
+  if(psMatch){
+    score += 30;
+    findings.push(mkFinding('high', 'Encoded PowerShell command',
+      'Contains a base64-encoded PowerShell command (powershell -enc ...). This is the most common way to hide ' +
+      'malicious scripts from casual inspection. Decoded, these commands routinely download and execute additional ' +
+      'payloads, disable antivirus, and establish persistence.',
+      30, {before:'', match: psMatch[0].slice(0,80) + (psMatch[0].length > 80 ? '...' : ''), after:''}));
+  }
+
+  // Base64 blob
+  var b64Match = text.match(/[A-Za-z0-9+\/]{200,}={0,2}/);
+  if(b64Match){
+    score += 15;
+    findings.push(mkFinding('medium', 'Large base64-encoded blob',
+      'A base64 block of 200+ characters was found. Malware droppers frequently embed their next stage as base64 ' +
+      'to hide it from text-based scanners and casual review.',
+      15, {before:'', match: b64Match[0].slice(0,80) + '...', after:''}));
+  }
+
+  // Commands
+  var hits = 0;
+  for(var i=0;i<INTEL.suspiciousCommands.length;i++){
+    var sn = findSnippet(text, INTEL.suspiciousCommands[i][0], 60);
+    if(sn){
+      hits++;
+      if(hits <= 4){
+        score += 15;
+        findings.push(mkFinding('high', 'Suspicious command: "' + INTEL.suspiciousCommands[i][0] + '"',
+          INTEL.suspiciousCommands[i][1], 15, sn));
+      }
+    }
+  }
+
+  // Keywords
+  for(var k=0;k<INTEL.maliciousFileKeywords.length;k++){
+    var kw = INTEL.maliciousFileKeywords[k];
+    var kwSn = findSnippet(text, kw, 60);
+    if(kwSn){
+      score += 20;
+      findings.push(mkFinding('high', 'Known malware indicator: "' + kw + '"',
+        'Contains the string "' + kw + '" — a well-known tool, command, or code fragment associated with malware ' +
+        'and offensive tooling.', 20, kwSn));
+    }
+  }
+
+  // Registry
+  if(/HKEY_(LOCAL_MACHINE|CURRENT_USER|CLASSES_ROOT)/i.test(text) || /\bHKLM\b|\bHKCU\b/.test(text)){
+    if(/CurrentVersion[\\\/]+Run/i.test(text)){
+      score += 20;
+      findings.push(mkFinding('high', 'Registry auto-start path referenced',
+        'References the Windows Run/RunOnce registry key, which launches programs automatically at user login. ' +
+        'This is the standard persistence mechanism for malware that must survive reboot.',
+        20, {before:'', match:'CurrentVersion\\Run', after:''}));
+    } else {
+      score += 8;
+      findings.push(mkFinding('medium', 'Windows registry paths referenced',
+        'References registry keys. Combined with autorun paths this is a persistence indicator.', 8));
+    }
+  }
+
+  // URLs
+  var urls = extractUrls(text);
+  for(var u=0;u<urls.length;u++){
+    var r = analyzeUrl(urls[u]);
+    if(r.score >= 35){
+      score += 20;
+      findings.push(mkFinding('high', 'Malicious URL embedded: ' + urls[u],
+        'The embedded URL scored ' + r.score + '/100 on URL analysis — verdict: ' + r.verdict + '. Hard-coded URLs ' +
+        'pointing to known-malicious or clearly-suspicious infrastructure are typical of downloaders and C2 beacon code.',
+        20, {before:'URL: ', match: urls[u], after:''}));
+    } else if(r.score >= 15){
+      score += 8;
+      findings.push(mkFinding('medium', 'Suspicious URL embedded: ' + urls[u],
+        'The embedded URL scored ' + r.score + '/100 — verdict: ' + r.verdict + '.', 8,
+        {before:'URL: ', match: urls[u], after:''}));
+    }
+  }
+
+  // Public IPs
+  var ipMatches = text.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g) || [];
+  var publicIps = [];
+  for(var ip=0; ip<ipMatches.length; ip++){
+    var p = ipMatches[ip].split('.').map(Number);
+    if(p[0]===10 || p[0]===127 || (p[0]===192&&p[1]===168) || (p[0]===172&&p[1]>=16&&p[1]<=31)) continue;
+    if(publicIps.indexOf(ipMatches[ip]) < 0) publicIps.push(ipMatches[ip]);
+  }
+  if(publicIps.length > 0 && !isBinary){
+    score += 10;
+    findings.push(mkFinding('medium', 'Hard-coded public IP address' + (publicIps.length>1?'es':''),
+      'Contains ' + publicIps.length + ' public IP address(es): ' + publicIps.slice(0,3).join(', ') + '. Malware ' +
+      'frequently hard-codes C2 IPs; legitimate documents rarely contain them.',
+      10, {before:'public IP: ', match: publicIps.slice(0,3).join(', '), after:''}));
+  }
+
+  return { findings:findings, score:Math.min(score,100) };
+}
+
+/* ==================== URL ANALYSIS ========================== */
+function analyzeUrl(url){
+  var findings=[], score=0;
+  var out = { url:url, syntax:'', reputation:'', blacklist:'', domain:'', threatIntel:'', verdict:'', score:0, findings:[] };
+
+  var parsed;
+  try { parsed = new URL(url); out.syntax = 'Valid'; }
+  catch(e){
+    out.syntax='Invalid'; out.verdict='Invalid URL'; out.score=10; out.findings=findings;
+    findings.push(mkFinding('low', 'Malformed URL', 'URL does not parse as a valid URI (RFC 3986).', 10));
+    return out;
+  }
+
+  var host = parsed.hostname.toLowerCase();
+  var parts = host.split('.');
+  var sld = parts.length >= 2 ? parts[parts.length-2] : parts[0];
+  var tld = '.' + (parts[parts.length-1] || '');
+  var path = parsed.pathname;
+  var pathLower = path.toLowerCase();
+  var fullPathLower = (parsed.pathname + parsed.search).toLowerCase();
+
+  /* ---- 4.2.1 Syntax checks ---- */
+  if(/^\d{1,3}(\.\d{1,3}){3}$/.test(host)){
+    score += 50;
+    findings.push(mkFinding('high', 'IP address used as hostname',
+      'The URL points directly to the IP address ' + host + ' instead of a domain name. Legitimate public websites ' +
+      'use domain names; direct IP access is a hallmark of command-and-control (C2) servers, malware distribution ' +
+      'points, and phishing infrastructure that intentionally bypasses domain-based blocklists.',
+      50, {before:'host: ', match: host, after:'  (raw IP, not a domain)'}));
+  }
+  if(parsed.port && ['80','443','8080','8443'].indexOf(parsed.port) < 0){
+    score += 20;
+    findings.push(mkFinding('high', 'Non-standard port :' + parsed.port,
+      'Port ' + parsed.port + ' is not typically used for web traffic. Attackers frequently host C2 servers and ' +
+      'malware distribution endpoints on unusual ports to evade network monitoring and firewall rules.',
+      20, {before:'', match:':' + parsed.port, after:'  (unusual port)'}));
+  }
+  if(url.indexOf('@') >= 0 && url.split('://')[1].split(/[\/?#]/)[0].indexOf('@') >= 0){
+    score += 40;
+    findings.push(mkFinding('high', '"@" used to obscure true host',
+      'The URL contains "@" in the authority section. In HTTP, everything before "@" is treated as a username and ' +
+      'everything after is the real host — so "http://trusted.com@evil.tk/" actually connects to evil.tk. This is ' +
+      'a classic phishing trick used to make the URL appear to point at a trusted site.',
+      40, {before:'', match:'@', after:''}));
+  }
+  if(/^https?:\/\/(0x[0-9a-f]+|0[0-7]+\.[0-7]+\.[0-7]+\.[0-7]+|\d{8,})/i.test(url)){
+    score += 35;
+    findings.push(mkFinding('high', 'Obfuscated IP encoding',
+      'The host uses hex, octal, or decimal-only encoding to disguise the IP address. Legitimate sites never do ' +
+      'this — it is used specifically to evade URL filters that match dotted-decimal IPs.',
+      35, {before:'host: ', match: host, after:''}));
+  }
+
+  /* ---- Subdomains ---- */
+  var subs = Math.max(0, parts.length - 2);
+  if(subs >= 5){
+    score += 30;
+    findings.push(mkFinding('high', 'Excessive subdomain nesting (' + subs + ' levels)',
+      'The hostname contains ' + subs + ' subdomain levels. Deeply nested subdomains are used to (a) bury the real ' +
+      'registrable domain at the far right of the URL where users rarely look, (b) evade URL-length detection rules, ' +
+      'and (c) mimic legitimate multi-service sites — e.g. "secure.login.verify.actual-bank.tk".',
+      30, {before:'host: ', match: host, after:'  (' + subs + ' subdomains)'}));
+  } else if(subs >= 3){
+    score += 12;
+    findings.push(mkFinding('medium', 'Elevated subdomain depth',
+      'The URL uses ' + subs + ' subdomain levels. This is typical of phishing URLs that impersonate multi-tenant ' +
+      'legitimate services.', 12));
+  }
+
+  /* ---- URL length ---- */
+  if(url.length > 200){
+    score += 15;
+    findings.push(mkFinding('medium', 'Very long URL (' + url.length + ' characters)',
+      'URLs over 200 characters are frequently used to obscure the real destination, pad detection signatures, or ' +
+      'hide payload parameters deep in the query string.', 15));
+  } else if(url.length > 100){
+    score += 5;
+    findings.push(mkFinding('low', 'Long URL (' + url.length + ' characters)',
+      'Long URLs can be an obfuscation technique.', 5));
+  }
+
+  /* ---- Encoding ---- */
+  var encodedCount = (url.match(/%[0-9a-fA-F]{2}/g) || []).length;
+  if(encodedCount > 5){
+    score += 15;
+    findings.push(mkFinding('medium', 'Heavy URL encoding (' + encodedCount + ' encoded chars)',
+      'Excessive percent-encoding is used to hide malicious strings from signature-based detection and to bypass ' +
+      'simple filters.', 15));
+  }
+  if(/[a-f0-9]{32,}/i.test(url)){
+    score += 15;
+    findings.push(mkFinding('medium', 'Long hexadecimal string in URL',
+      'The URL contains a hex string of 32+ characters — typical of tracking identifiers, hashes of malicious ' +
+      'payloads, or obfuscated shellcode identifiers used by droppers.', 15));
+  }
+  if(/[A-Za-z0-9+\/]{40,}={0,2}/.test(parsed.search)){
+    score += 15;
+    findings.push(mkFinding('medium', 'Base64-like query parameter',
+      'The query string contains a base64-encoded value. Attackers use base64 to hide URLs, commands, or binary ' +
+      'data inside parameters that would otherwise be filtered by regex rules.', 15));
+  }
+
+  /* ---- Reputation ---- */
+  if(INTEL.suspiciousTLDs.indexOf(tld) >= 0){
+    score += 20;
+    findings.push(mkFinding('medium', 'Suspicious top-level domain "' + tld + '"',
+      tld + ' is a free or low-cost TLD that sees disproportionately high abuse rates (spam, phishing, malware ' +
+      'distribution). Legitimate businesses rarely use it for customer-facing services.',
+      20, {before:'TLD: ', match: tld, after:''}));
+  }
+  if(INTEL.shorteners.indexOf(host) >= 0){
+    score += 25;
+    findings.push(mkFinding('medium', 'URL shortener detected',
+      host + ' hides the final destination from users and from URL-based filters. Attackers use shorteners to bypass ' +
+      'reputation checks and make the URL appear more trustworthy.',
+      25, {before:'host: ', match: host, after:''}));
+  }
+
+  /* ---- DGA ---- */
+  var ent = stringEntropy(sld);
+  if(ent > 3.5 && sld.length > 8){
+    score += 30;
+    findings.push(mkFinding('high', 'Domain appears algorithmically generated (DGA)',
+      'The second-level domain "' + sld + '" has an entropy of ' + ent.toFixed(2) + ' bits/char, indicating a ' +
+      'random character distribution. DGA (Domain Generation Algorithm) malware uses such names to rotate ' +
+      'command-and-control infrastructure daily and defeat static blocklists.',
+      30, {before:'SLD: ', match: sld, after:'  entropy=' + ent.toFixed(2)}));
+  }
+  if(sld.length > 20){
+    score += 10;
+    findings.push(mkFinding('low', 'Unusually long domain name (' + sld.length + ' chars)',
+      'Long, random-looking domain names are commonly used by malware and spam infrastructure.', 10));
+  }
+  var digits = (sld.match(/\d/g) || []).length;
+  if(sld.length > 5 && digits / sld.length > 0.3){
+    score += 15;
+    findings.push(mkFinding('medium', 'High digit ratio in domain',
+      Math.round(digits/sld.length*100) + '% of the domain name is digits — a pattern typical of bulk-registered ' +
+      'malicious domains that are mass-generated.', 15,
+      {before:'SLD: ', match: sld, after:'  (' + Math.round(digits/sld.length*100) + '% digits)'}));
+  }
+  var hyphens = (sld.match(/-/g) || []).length;
+  if(hyphens >= 3){
+    score += 15;
+    findings.push(mkFinding('medium', 'Multiple hyphens in domain (' + hyphens + ')',
+      'Domains with many hyphens are frequently used to mimic legitimate brands — e.g. ' +
+      '"secure-login-account-verify.tk".', 15,
+      {before:'SLD: ', match: sld, after:'  (' + hyphens + ' hyphens)'}));
+  }
+  if(sld.indexOf('xn--') === 0 || host.indexOf('xn--') >= 0){
+    score += 50;
+    findings.push(mkFinding('high', 'Punycode / IDN homograph domain',
+      'The domain contains an internationalized (punycode) label. Attackers use visually identical Unicode ' +
+      'characters to make a domain look like a legitimate site (e.g. "\u0430\u0440\u0440\u04cf\u0435.com" looks like ' +
+      '"apple.com"). This is a very strong phishing indicator.',
+      50, {before:'host: ', match: host, after:''}));
+  }
+
+  /* ---- Brand ---- */
+  for(var b=0; b<INTEL.brandNames.length; b++){
+    var brand = INTEL.brandNames[b];
+    if(sld === brand) continue;
+    var dist = levenshtein(sld, brand);
+    if(dist === 1 && Math.abs(sld.length - brand.length) <= 1 && sld.length >= 4){
+      score += 50;
+      findings.push(mkFinding('high', 'Possible typosquatting of "' + brand + '"',
+        'The domain "' + sld + '" differs from the well-known brand "' + brand + '" by exactly 1 character ' +
+        '(Levenshtein distance = 1). This is a classic phishing technique — e.g. "paypa1.com", "g00gle.com", ' +
+        '"micosoft.com".',
+        50, {before:'SLD: ', match: sld, after:'  vs brand "' + brand + '" (distance=1)'}));
+      break;
+    }
+    if(host.indexOf(brand) >= 0 && sld !== brand && !(new RegExp(brand + '\\' + tld + '$').test(host))){
+      score += 40;
+      findings.push(mkFinding('high', 'Brand "' + brand + '" used in subdomain',
+        'The URL embeds the brand "' + brand + '" somewhere in the hostname, but the actual registrable domain is ' +
+        '"' + sld + tld + '" — a completely different owner. This tricks users who only glance at the first part ' +
+        'of the URL. Example: "paypal.secure-check.tk" is not PayPal.',
+        40, {before:'host: ', match: host, after:'  (real domain is "' + sld + tld + '")'}));
+      break;
+    }
+  }
+
+  /* ---- Double TLD ---- */
+  var otherTlds = ['.com','.net','.org','.gov','.edu','.co'];
+  for(var o=0; o<otherTlds.length; o++){
+    var ot = otherTlds[o];
+    if(host.indexOf(ot) >= 0 && host.indexOf(ot) !== host.length - ot.length && tld !== ot){
+      score += 35;
+      findings.push(mkFinding('high', 'Misleading domain structure',
+        'The hostname contains "' + ot + '" partway through (e.g. "secure.bank.com.evil.tk"). This is designed to ' +
+        'make the URL look like it belongs to a legitimate domain, when the actual registrable domain is "' + sld + tld + '".',
+        35, {before:'host: ', match: host, after:'  (real domain: "' + sld + tld + '")'}));
+      break;
+    }
+  }
+
+  /* ---- Path checks ---- */
+  if(/\.(exe|dll|scr|msi|bat|cmd|ps1|vbs|jar|apk|bin|com|pif|hta)(\?|$)/i.test(path)){
+    score += 30;
+    findings.push(mkFinding('high', 'URL points to an executable download',
+      'The URL path ends in an executable extension. Drive-by download URLs frequently end in .exe, .scr, .msi, ' +
+      'or script files that launch immediately when clicked.',
+      30, {before:'path: ', match: path, after:''}));
+  }
+  var sensitivePaths = ['/wp-admin','/phpmyadmin','/.env','/config.php','/backup','/admin/config','/shell','/cmd.php','/upload.php','/xmlrpc.php','/cgi-bin/'];
+  for(var sp=0; sp<sensitivePaths.length; sp++){
+    if(pathLower.indexOf(sensitivePaths[sp]) >= 0){
+      score += 20;
+      findings.push(mkFinding('medium', 'Sensitive server path: "' + sensitivePaths[sp] + '"',
+        'The URL targets a sensitive administration, configuration, or exploit-related path. This is characteristic ' +
+        'of automated vulnerability scanners and attempts to access compromised administration panels or legacy ' +
+        'XML-RPC endpoints abused for brute-force amplification.',
+        20, {before:'path: ', match: path, after:''}));
+      break;
+    }
+  }
+  var phishingHits = [];
+  for(var pk=0; pk<INTEL.urlPhishingKeywords.length; pk++){
+    if(fullPathLower.indexOf(INTEL.urlPhishingKeywords[pk]) >= 0) phishingHits.push(INTEL.urlPhishingKeywords[pk]);
+  }
+  if(phishingHits.length >= 2){
+    score += 15;
+    findings.push(mkFinding('medium', 'Multiple phishing keywords in path',
+      'Path/query contains ' + phishingHits.length + ' phishing keywords: ' + phishingHits.slice(0,4).join(', ') + '. ' +
+      'Legitimate sites rarely stack multiple urgency/credential terms into a URL.',
+      15, {before:'matched: ', match: phishingHits.slice(0,4).join(', '), after:''}));
+  }
+
+  /* ---- Query checks ---- */
+  var paramCount = 0;
+  try { paramCount = Array.from(parsed.searchParams.keys()).length; } catch(e){}
+  if(paramCount > 6){
+    score += 5;
+    findings.push(mkFinding('low', 'Many query parameters (' + paramCount + ')',
+      'A high parameter count can indicate tracking, redirect chains, or payload smuggling.', 5));
+  }
+  if(/(redirect|url|next|target|goto|dest|return)=/i.test(parsed.search)){
+    score += 20;
+    findings.push(mkFinding('high', 'Open-redirect parameter present',
+      'The query string contains a redirect-style parameter (redirect/url/next/return). Attackers exploit these to ' +
+      'route victims through a trusted domain before landing on the malicious site, defeating reputation-based ' +
+      'filters that only check the initial host.',
+      20, {before:'query: ', match: parsed.search.slice(0, 80), after:''}));
+  }
+
+  /* ---- Scheme ---- */
+  if(parsed.protocol !== 'https:'){
+    score += 5;
+    findings.push(mkFinding('low', 'Unencrypted HTTP connection',
+      'The URL uses plain HTTP. Credentials and data submitted to this site travel unencrypted over the network.', 5));
+  }
+
+  /* ---- Blacklist (dominant) ---- */
+  var listed = false;
+  for(var bl=0; bl<INTEL.blacklistDomains.length; bl++){
+    var d = INTEL.blacklistDomains[bl];
+    if(host === d || host.indexOf('.' + d) >= 0){ listed = true; break; }
+  }
+  out.blacklist = listed ? 'LISTED' : 'Not listed';
+  if(listed){
+    score += 60;
+    findings.push(mkFinding('high', 'Domain on known-malicious blacklist',
+      '"' + host + '" matches a domain in the local threat-intelligence blacklist. This indicates the domain has ' +
+      'been previously observed distributing malware, phishing, or C2 traffic.',
+      60, {before:'blacklisted host: ', match: host, after:''}));
+  }
+
+  score = Math.min(score, 100);
+  out.score = score;
+  out.verdict = score >= 35 ? 'Malicious' : score >= 15 ? 'Suspicious' : 'Clean';
+  out.reputation = score >= 35 ? 'Poor' : score >= 15 ? 'Suspicious' : 'Good';
+  out.domain = host;
+  out.threatIntel = listed ? 'Match on threat-intel feed' : (score >= 15 ? 'Heuristic indicators present' : 'No match');
+  out.findings = findings;
+  return out;
+}
+
+/* ==================== EMAIL ANALYSIS ======================== */
+function analyzeEmail(raw){
+  var findings=[], score=0;
+  var lower = raw.toLowerCase();
+
+  // Parse headers (everything before first blank line)
+  var headerEnd = raw.indexOf('\n\n');
+  var headerSection = headerEnd >= 0 ? raw.slice(0, headerEnd) : raw.slice(0, 2000);
+  var bodySection = headerEnd >= 0 ? raw.slice(headerEnd) : '';
+  var headers = {};
+  var headerLines = headerSection.split(/\r?\n/);
+  var currentKey = null;
+  for(var i=0;i<headerLines.length;i++){
+    var line = headerLines[i];
+    if(/^\s/.test(line) && currentKey){ headers[currentKey] += ' ' + line.trim(); continue; }
+    var m = line.match(/^([A-Za-z-]+):\s*(.*)$/);
+    if(m){ currentKey = m[1].toLowerCase(); headers[currentKey] = m[2]; }
+  }
+  function headerVal(k){ return headers[k] || ''; }
+
+  var fromH = headerVal('from');
+  var replyTo = headerVal('reply-to');
+  var returnPath = headerVal('return-path');
+  var subject = headerVal('subject');
+  var received = headerVal('received');
+  var authResults = headerVal('authentication-results');
+
+  // From vs Reply-To mismatch
+  if(fromH && replyTo && fromH !== replyTo){
+    score += 15;
+    findings.push(mkFinding('medium', 'Reply-To header does not match From',
+      'The Reply-To header differs from the From header. This is a common spoofing tactic that routes the victim\'s ' +
+      'reply to the attacker\'s mailbox while the From field impersonates a trusted sender.',
+      15, {before:'From: ', match: fromH, after:'  |  Reply-To: ' + replyTo}));
+  }
+  if(fromH && returnPath && returnPath !== fromH){
+    var fromDomain = (fromH.match(/@([^>\s]+)/)||[])[1] || '';
+    var rpDomain = (returnPath.match(/@([^>\s]+)/)||[])[1] || '';
+    if(fromDomain && rpDomain && fromDomain !== rpDomain){
+      score += 20;
+      findings.push(mkFinding('high', 'Return-Path domain mismatch',
+        'The Return-Path (envelope sender) domain differs from the visible From domain. This indicates the message ' +
+        'was likely sent via an unauthorised relay or with a spoofed From header — the classic signature of ' +
+        'spoofed phishing email that will still deliver (SPF passes on the Return-Path, but From is faked).',
+        20, {before:'From domain: ', match: fromDomain, after:'  |  envelope domain: ' + rpDomain}));
+    }
+  }
+
+  // Sender domain checks
+  if(fromH){
+    var fdMatch = fromH.match(/@([^>\s]+)/);
+    var fromDomain = fdMatch ? fdMatch[1].toLowerCase() : '';
+    var fdParts = fromDomain.split('.');
+    var fdTld = '.' + fdParts[fdParts.length-1];
+    if(INTEL.suspiciousTLDs.indexOf(fdTld) >= 0){
+      score += 15;
+      findings.push(mkFinding('medium', 'Sender uses suspicious TLD',
+        'The sender\'s domain "' + fromDomain + '" uses the TLD ' + fdTld + ', which has an elevated abuse rate.',
+        15, {before:'From domain: ', match: fromDomain, after:''}));
+    }
+    // Punycode in From
+    if(fromH.indexOf('xn--') >= 0){
+      score += 40;
+      findings.push(mkFinding('high', 'Punycode / IDN homograph sender domain',
+        'The From header contains an internationalized (punycode) domain label. Attackers use visually identical ' +
+        'Unicode characters to make the sender appear to come from a known brand (e.g. apple vs \\u0430pple).',
+        40, {before:'From: ', match: fromH, after:''}));
+    }
+    // Brand in From but wrong real domain
+    for(var b=0;b<INTEL.brandNames.length;b++){
+      var brand = INTEL.brandNames[b];
+      if(lower.indexOf(brand) >= 0 && fromDomain.indexOf(brand) < 0){
+        score += 25;
+        findings.push(mkFinding('high', 'Brand name in subject/body but not in sender domain',
+          'The message mentions "' + brand + '" but was sent from "' + fromDomain + '" — a domain that does not ' +
+          'belong to ' + brand + '. This is a classic brand-impersonation phishing pattern.',
+          25, {before:'sender: ', match: fromDomain, after:'  |  mentioned brand: ' + brand}));
+        break;
+      }
+    }
+  }
+
+  // Subject phishing
+  var subjectLower = subject.toLowerCase();
+  var subjHits = ['urgent','verify','suspended','locked','unusual','immediately','action required','confirm','password','account']
+    .filter(function(w){ return subjectLower.indexOf(w) >= 0; });
+  if(subjHits.length >= 2){
+    score += 12;
+    findings.push(mkFinding('medium', 'Phishing language in subject line',
+      'The subject line contains ' + subjHits.length + ' urgency/credential keywords: ' + subjHits.join(', ') + '. ' +
+      'Real transactional email rarely stacks multiple pressure terms like this.',
+      12, {before:'subject: ', match: subject, after:''}));
+  }
+
+  // SPF / DKIM / DMARC
+  if(authResults){
+    if(/\bspf=fail\b/i.test(authResults)){
+      score += 30;
+      findings.push(mkFinding('high', 'SPF authentication failure',
+        'The Authentication-Results header reports spf=fail. The sending server is not authorised to send mail for ' +
+        'that domain — a strong indicator of spoofing or a compromised relay.',
+        30, {before:'', match:'spf=fail', after:''}));
+    }
+    if(/\bdkim=fail\b/i.test(authResults)){
+      score += 25;
+      findings.push(mkFinding('high', 'DKIM authentication failure',
+        'The Authentication-Results header reports dkim=fail. The message signature does not verify — the message ' +
+        'has been modified in transit or was never legitimately signed by the claimed domain.',
+        25, {before:'', match:'dkim=fail', after:''}));
+    }
+    if(/\bdmarc=fail\b/i.test(authResults)){
+      score += 35;
+      findings.push(mkFinding('high', 'DMARC authentication failure',
+        'The Authentication-Results header reports dmarc=fail. The message fails the domain owner\'s DMARC policy — ' +
+        'a definitive indication that the From header has been spoofed.',
+        35, {before:'', match:'dmarc=fail', after:''}));
+    }
+  }
+
+  // Received chain
+  var receivedCount = (raw.match(/^Received:/gmi) || []).length;
+  if(receivedCount > 6){
+    score += 8;
+    findings.push(mkFinding('low', 'Long Received chain (' + receivedCount + ' hops)',
+      'The message passed through ' + receivedCount + ' mail servers. Unusually long chains can be used to hide ' +
+      'the true origin of a message.', 8));
+  }
+
+  // Attachments
+  var attachMatches = raw.match(/filename="?([^"\r\n]+)"?/gi) || [];
+  var dangerousAttach = [];
+  for(var a=0;a<attachMatches.length;a++){
+    var fname = attachMatches[a].replace(/filename="?/i,'').replace(/"$/,'');
+    var fext = (fname.split('.').pop()||'').toLowerCase();
+    if(HIGH_RISK_EXT.indexOf(fext) >= 0 || MED_RISK_EXT.indexOf(fext) >= 0){
+      dangerousAttach.push(fname);
+    }
+  }
+  if(dangerousAttach.length > 0){
+    score += 35;
+    findings.push(mkFinding('high', 'Dangerous email attachment detected',
+      'The email contains attachment(s) with executable or macro-capable extensions: ' + dangerousAttach.join(', ') + '. ' +
+      'Malicious attachments are the primary delivery mechanism for ransomware and banking trojans ' +
+      '(Emotet, QakBot, IcedID).',
+      35, {before:'attachments: ', match: dangerousAttach.join(', '), after:''}));
+  }
+
+  // URL scan (both body + any URLs in headers)
+  var urls = extractUrls(raw);
+  for(var u=0;u<urls.length;u++){
+    var r = analyzeUrl(urls[u]);
+    if(r.score >= 35){
+      score += 20;
+      findings.push(mkFinding('high', 'Malicious link in email: ' + urls[u],
+        'The link scored ' + r.score + '/100 on URL analysis (' + r.verdict + ').',
+        20, {before:'URL: ', match: urls[u], after:'  (' + r.verdict + ')'}));
+    } else if(r.score >= 15){
+      score += 10;
+      findings.push(mkFinding('medium', 'Suspicious link in email: ' + urls[u],
+        'URL scored ' + r.score + '/100 — verdict ' + r.verdict + '.',
+        10, {before:'URL: ', match: urls[u], after:''}));
+    }
+  }
+
+  // Body phishing keywords
+  var bodyLower = bodySection.toLowerCase();
+  var bodyHits = 0;
+  for(var i2=0;i2<INTEL.urlPhishingKeywords.length;i2++){
+    var kw = INTEL.urlPhishingKeywords[i2];
+    if(bodyLower.indexOf(kw) >= 0){
+      bodyHits++;
+      if(bodyHits <= 4){
+        score += 6;
+        findings.push(mkFinding('medium', 'Phishing language in body: "' + kw + '"',
+          'The body contains the phrase "' + kw + '". These terms are typical of credential-harvesting messages ' +
+          '(urgency, verification, account-threat framing).',
+          6, {before:'', match: kw, after:''}));
+      }
+    }
+  }
+
+  return { score: Math.min(score,100), findings:findings,
+           meta:{ from:fromH, replyTo:replyTo, returnPath:returnPath, subject:subject,
+                  links:urls.length, attachments:dangerousAttach, receivedHops:receivedCount,
+                  authResults:authResults } };
+}
+
+/* ==================== METADATA ============================== */
+function extractMetadata(evidence, fileObj, callback){
+  var md = { fileName:evidence.name, sizeBytes:evidence.size, sizeHuman:humanSize(evidence.size),
+             mimeType:evidence.mime || 'unknown', sha256:evidence.sha256 || '-',
+             uploadedAt:evidence.uploadedAt, caseId:evidence.caseId };
+  var ext = (evidence.name.split('.').pop() || '').toLowerCase();
+  if(fileObj && IMAGE_EXT.indexOf(ext) >= 0){
+    try {
+      var url = URL.createObjectURL(fileObj);
+      var img = new Image();
+      img.onload = function(){ md.width=img.width; md.height=img.height; URL.revokeObjectURL(url); callback(md); };
+      img.onerror = function(){ URL.revokeObjectURL(url); callback(md); };
+      img.src = url;
+      return;
+    } catch(e){}
+  }
+  callback(md);
+}
+
+/* ==================== RISK SCORE ============================ */
+function generateRiskScore(parts){
+  var total = 0;
+  for(var i=0;i<parts.length;i++) total += (parts[i].score || 0);
+  total = Math.min(total, 100);
+  var level = total >= 60 ? 'high' : total >= 30 ? 'medium' : total > 0 ? 'low' : 'clean';
+  return { score:total, level:level };
+}
+
+/* ==================== HASHING =============================== */
+function sha256(bytes, callback){
+  try {
+    if(window.crypto && window.crypto.subtle){
+      window.crypto.subtle.digest('SHA-256', bytes).then(function(buf){
+        var arr = new Uint8Array(buf), hex = '';
+        for(var i=0;i<arr.length;i++) hex += ('0'+arr[i].toString(16)).slice(-2);
+        callback(hex);
+      }).catch(function(){ callback(fallbackHash(bytes)); });
+    } else callback(fallbackHash(bytes));
+  } catch(e){ callback(fallbackHash(bytes)); }
+}
+function fallbackHash(bytes){
+  var h = 5381;
+  for(var i=0;i<bytes.length;i++) h = ((h<<5) + h + bytes[i]) >>> 0;
+  return 'fallback-' + h.toString(16);
+}
+
+/* ==================== ANALYSIS RESULT PREP ================== */
+function prepareAnalysisResult(evidence, bytes, text, fileObj, callback){
+  var parts = [];
+  if(evidence.type === 'url') parts.push(analyzeUrl(text));
+  else if(evidence.type === 'email') parts.push(analyzeEmail(text));
+  else parts.push(analyzeFile(evidence.name, evidence.size, bytes, text));
+
+  var risk = generateRiskScore(parts);
+  extractMetadata(evidence, fileObj, function(meta){
+    var result = {
+      id: uid('AN'), evidenceId: evidence.id, caseId: evidence.caseId,
+      processedAt: new Date().toISOString(),
+      riskScore: risk.score, riskLevel: risk.level,
+      verdict: risk.score >= 60 ? 'Malicious'
+             : risk.score >= 30 ? 'Suspicious'
+             : risk.score > 0   ? 'Low risk'
+             : 'Clean',
+      findings: [],
+      urlDetail: evidence.type === 'url' ? parts[0] : null,
+      emailDetail: evidence.type === 'email' ? parts[0].meta : null,
+      metadata: meta
+    };
+    for(var i=0;i<parts.length;i++){
+      var fs = parts[i].findings || [];
+      for(var j=0;j<fs.length;j++) result.findings.push(fs[j]);
+    }
+    callback(result);
+  });
+}
+
+/* ==================== REPORT ================================ */
+function buildReport(caseObj, evidenceList, analysisList){
+  var threats=0, suspicious=0, clean=0, highest=0;
+  for(var i=0;i<analysisList.length;i++){
+    var a = analysisList[i];
+    if(a.riskLevel === 'high') threats++;
+    else if(a.riskLevel === 'medium') suspicious++;
+    else clean++;
+    if(a.riskScore > highest) highest = a.riskScore;
+  }
+  var items = [];
+  for(var k=0;k<analysisList.length;k++){
+    var an = analysisList[k], ev = null;
+    for(var e=0;e<evidenceList.length;e++) if(evidenceList[e].id === an.evidenceId){ ev = evidenceList[e]; break; }
+    items.push({ evidenceName: ev?ev.name:'unknown', type: ev?ev.type:'file',
+                 score: an.riskScore, level: an.riskLevel, verdict: an.verdict, findings: an.findings });
+  }
+  return { id:uid('RPT'), caseId:caseObj.id, caseName:caseObj.name,
+           generatedAt:new Date().toISOString(),
+           summary:{ totalEvidence:evidenceList.length, threats:threats, suspicious:suspicious,
+                     clean:clean, highestScore:highest }, items:items };
+}
+
+/* ==================== UTILITIES ============================= */
+function toast(msg){
+  var t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3200);
+}
+function riskBadge(level){
+  var map = { high:'b-high', medium:'b-med', low:'b-low', clean:'b-low' };
+  var label = { high:'High', medium:'Medium', low:'Low', clean:'Clean' };
+  return '<span class="badge ' + (map[level]||'b-info') + '">' + (label[level]||level) + '</span>';
+}
+function riskColor(level){
+  return { high:'var(--high)', medium:'var(--med)', low:'var(--low)', clean:'var(--low)' }[level] || 'var(--muted)';
+}
+
+/* ==================== ROUTER ================================ */
+var CURRENT_CASE = null;
+var overlay = document.getElementById('overlay');
+var modal = document.getElementById('modal');
+function closeModal(){ if(overlay) overlay.classList.remove('active'); }
+window.closeModal = closeModal;
+
+function navigate(route, param){
+  if(route === 'case') CURRENT_CASE = param;
+  var links = document.querySelectorAll('aside a');
+  for(var i=0;i<links.length;i++){
+    var a = links[i];
+    var active = a.dataset.route === route || (route === 'case' && a.dataset.route === 'cases');
+    a.classList.toggle('active', active);
+  }
+  var routes = { dashboard:renderDashboard, cases:renderCases, case:renderCaseDetail,
+                 reports:renderReports, trace:renderTraceability };
+  if(routes[route]) routes[route]();
+}
+window.navigate = navigate;
+
+/* ==================== RENDERERS ============================= */
+function renderDashboard(){
+  var cases = DB.cases(), evidence = DB.evidence(), analysis = DB.analysis(), reports = DB.reports();
+  var threats = 0;
+  for(var i=0;i<analysis.length;i++) if(analysis[i].riskLevel === 'high') threats++;
+  var html = '<h2 class="page-title">Dashboard</h2>' +
+    '<div class="page-sub">Case overview and analysis statistics</div>' +
+    '<div id="install-banner-slot"></div>' +
+    '<div class="stats">' +
+      '<div class="stat"><div class="num">'+cases.length+'</div><div class="lbl">Cases</div></div>' +
+      '<div class="stat"><div class="num">'+evidence.length+'</div><div class="lbl">Evidence Items</div></div>' +
+      '<div class="stat"><div class="num" style="color:var(--high)">'+threats+'</div><div class="lbl">Threats Detected</div></div>' +
+      '<div class="stat"><div class="num">'+reports.length+'</div><div class="lbl">Reports</div></div>' +
+    '</div>' +
+    '<div class="row-flex" style="margin-bottom:14px">' +
+      '<h3 style="font-size:16px">Recent Cases</h3><div class="spacer"></div>' +
+      '<button class="btn-ghost" id="seed-demo">Load Sample Data</button>' +
+      '<button class="btn-primary" id="new-case-btn">+ New Case</button>' +
+    '</div>';
+  if(cases.length === 0){
+    html += '<div class="card empty">No cases yet. Create one or load sample data.</div>';
+  } else {
+    html += '<div class="card" style="padding:0"><table><thead><tr><th>Case ID</th><th>Name</th><th>Status</th><th>Evidence</th><th>Created</th></tr></thead><tbody>';
+    for(var c=0;c<cases.length;c++){
+      var cs = cases[c], evCount = 0;
+      for(var e=0;e<evidence.length;e++) if(evidence[e].caseId === cs.id) evCount++;
+      html += '<tr class="clickable" data-case="'+cs.id+'"><td><code>'+cs.id+'</code></td><td><b>'+esc(cs.name)+'</b></td>' +
+        '<td>'+cs.status+'</td><td>'+evCount+'</td><td>'+fmtDate(cs.created)+'</td></tr>';
+    }
+    html += '</tbody></table></div>';
+  }
+  document.getElementById('main').innerHTML = html;
+  var rows = document.querySelectorAll('tr[data-case]');
+  for(var r=0;r<rows.length;r++){ (function(row){ row.onclick=function(){ navigate('case', row.dataset.case); }; })(rows[r]); }
+  document.getElementById('new-case-btn').onclick = openNewCaseModal;
+  document.getElementById('seed-demo').onclick = seedDemoData;
+  renderInstallBanner();
+}
+
+function renderInstallBanner(){
+  var slot = document.getElementById('install-banner-slot');
+  if(!slot) return;
+  if(window.__deferredInstallPrompt){
+    slot.innerHTML = '<div class="install-banner">' +
+      '<div><b>Install this app on your computer</b><br/>' +
+      '<span style="color:var(--muted);font-size:12.5px">Runs in its own window, like a downloaded desktop app.</span></div>' +
+      '<div class="spacer"></div><button class="btn-primary" id="do-install">Install App</button></div>';
+    document.getElementById('do-install').onclick = function(){
+      window.__deferredInstallPrompt.prompt();
+      window.__deferredInstallPrompt.userChoice.then(function(choice){
+        if(choice.outcome === 'accepted') toast('App installed');
+        window.__deferredInstallPrompt = null;
+        renderInstallBanner();
+      });
+    };
+  } else {
+    slot.innerHTML = '';
+  }
+}
+
+function renderCases(){
+  var cases = DB.cases();
+  var html = '<h2 class="page-title">Cases</h2><div class="page-sub">Process 2.0 - Case Management (D2)</div>' +
+    '<div class="row-flex" style="margin-bottom:16px"><div class="spacer"></div>' +
+    '<button class="btn-primary" id="new-case-btn">+ New Case</button></div>';
+  if(cases.length === 0){ html += '<div class="card empty">No cases.</div>'; }
+  else {
+    html += '<div class="card" style="padding:0"><table><thead><tr><th>Case ID</th><th>Name</th><th>Description</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody>';
+    for(var i=0;i<cases.length;i++){
+      var c = cases[i];
+      html += '<tr class="clickable" data-case="'+c.id+'"><td><code>'+c.id+'</code></td><td><b>'+esc(c.name)+'</b></td>' +
+        '<td>'+esc(c.description||'')+'</td><td>'+c.status+'</td><td>'+fmtDate(c.created)+'</td>' +
+        '<td><button class="btn-danger" data-del-case="'+c.id+'">Delete</button></td></tr>';
+    }
+    html += '</tbody></table></div>';
+  }
+  document.getElementById('main').innerHTML = html;
+  var rows = document.querySelectorAll('tr[data-case]');
+  for(var r=0;r<rows.length;r++){ (function(row){ row.onclick=function(){ navigate('case', row.dataset.case); }; })(rows[r]); }
+  var delCases = document.querySelectorAll('button[data-del-case]');
+  for(var dc=0;dc<delCases.length;dc++){
+    (function(btn){ btn.onclick=function(ev){ ev.stopPropagation(); deleteCase(btn.dataset.delCase); }; })(delCases[dc]);
+  }
+  document.getElementById('new-case-btn').onclick = openNewCaseModal;
+}
+
+function renderCaseDetail(){
+  var c = null, cases = DB.cases();
+  for(var i=0;i<cases.length;i++) if(cases[i].id === CURRENT_CASE){ c = cases[i]; break; }
+  if(!c){ navigate('cases'); return; }
+  var evidence = [], analysis = [], allEv = DB.evidence(), allAn = DB.analysis();
+  for(var e=0;e<allEv.length;e++) if(allEv[e].caseId === c.id) evidence.push(allEv[e]);
+  for(var a=0;a<allAn.length;a++) if(allAn[a].caseId === c.id) analysis.push(allAn[a]);
+  var html = '<div class="row-flex" style="margin-bottom:4px"><button class="btn-ghost" id="back-cases">Back to Cases</button></div>' +
+    '<h2 class="page-title">'+esc(c.name)+'</h2>' +
+    '<div class="page-sub"><code>'+c.id+'</code> - Created '+fmtDate(c.created)+' - Status: '+c.status+'</div>' +
+    '<div class="row-flex" style="margin-bottom:16px">' +
+      '<button class="btn-primary" id="upload-btn">+ Upload Evidence (3.0)</button>' +
+      '<button class="btn-ghost" id="gen-report-btn">Generate Report (5.0)</button>' +
+      '<button class="btn-danger" id="delete-case-btn">Delete Case</button></div>' +
+    '<div class="sec-title">Evidence (D3)</div>';
+  if(evidence.length === 0){ html += '<div class="card empty">No evidence uploaded yet.</div>'; }
+  else {
+    html += '<div class="card" style="padding:0"><table><thead><tr><th>Name</th><th>Type</th><th>Size</th><th>Risk</th><th>Verdict</th><th></th></tr></thead><tbody>';
+    for(var k=0;k<evidence.length;k++){
+      var ev = evidence[k], an = null;
+      for(var x=0;x<analysis.length;x++) if(analysis[x].evidenceId === ev.id){ an = analysis[x]; break; }
+      var lvl = an ? an.riskLevel : 'clean';
+      var score = an ? an.riskScore : 0;
+      var verdict = an ? an.verdict : 'Pending';
+      html += '<tr><td><b>'+esc(ev.name)+'</b><br/><span style="color:var(--muted);font-size:11.5px">' + ev.sha256.slice(0,16)+'...</span></td>' +
+        '<td><span class="badge b-info">'+ev.type+'</span></td><td>'+humanSize(ev.size)+'</td>' +
+        '<td>'+riskBadge(lvl)+' <span style="color:var(--muted);font-size:12px">'+score+'/100</span>' +
+          '<div class="risk-bar"><div class="risk-fill" style="width:'+score+'%;background:'+riskColor(lvl)+'"></div></div></td>' +
+        '<td>'+verdict+'</td>' +
+        '<td>'+(an?'<button class="btn-ghost" data-an="'+an.id+'">View</button> ':'')+
+          '<button class="btn-danger" data-del-ev="'+ev.id+'">Delete</button></td></tr>';
+    }
+    html += '</tbody></table></div>';
+  }
+  document.getElementById('main').innerHTML = html;
+  document.getElementById('back-cases').onclick = function(){ navigate('cases'); };
+  document.getElementById('upload-btn').onclick = function(){ openUploadModal(c.id); };
+  document.getElementById('gen-report-btn').onclick = function(){ generateReport(c.id); };
+  document.getElementById('delete-case-btn').onclick = function(){ deleteCase(c.id); };
+  var anBtns = document.querySelectorAll('button[data-an]');
+  for(var b=0;b<anBtns.length;b++){ (function(btn){ btn.onclick=function(){ showAnalysis(btn.dataset.an); }; })(anBtns[b]); }
+  var evBtns = document.querySelectorAll('button[data-del-ev]');
+  for(var eb=0;eb<evBtns.length;eb++){ (function(btn){ btn.onclick=function(){ deleteEvidence(btn.dataset.delEv); }; })(evBtns[eb]); }
+}
+
+function renderReports(){
+  var reports = DB.reports();
+  var html = '<h2 class="page-title">Reports</h2><div class="page-sub">Process 5.0 - AI Report Generation (D5)</div>';
+  if(reports.length === 0){ html += '<div class="card empty">No reports generated yet.</div>'; }
+  else {
+    html += '<div class="card" style="padding:0"><table><thead><tr><th>Report ID</th><th>Case</th><th>Evidence</th><th>Threats</th><th>Generated</th><th></th></tr></thead><tbody>';
+    for(var i=0;i<reports.length;i++){
+      var r = reports[i];
+      html += '<tr><td><code>'+r.id+'</code></td><td>'+esc(r.caseName)+'</td><td>'+r.summary.totalEvidence+'</td>' +
+        '<td>'+r.summary.threats+'</td><td>'+fmtDate(r.generatedAt)+'</td>' +
+        '<td><button class="btn-ghost" data-view="'+r.id+'">Open</button> ' +
+            '<button class="btn-ghost" data-dl="'+r.id+'">Export</button> ' +
+            '<button class="btn-danger" data-del-rpt="'+r.id+'">Delete</button></td></tr>';
+    }
+    html += '</tbody></table></div>';
+  }
+  document.getElementById('main').innerHTML = html;
+  var vB = document.querySelectorAll('button[data-view]');
+  for(var v=0;v<vB.length;v++){ (function(b){ b.onclick=function(){ viewReport(b.dataset.view); }; })(vB[v]); }
+  var dB = document.querySelectorAll('button[data-dl]');
+  for(var d=0;d<dB.length;d++){ (function(b){ b.onclick=function(){ downloadReport(b.dataset.dl); }; })(dB[d]); }
+  var rB = document.querySelectorAll('button[data-del-rpt]');
+  for(var rb=0;rb<rB.length;rb++){ (function(b){ b.onclick=function(){ deleteReport(b.dataset.delRpt); }; })(rB[rb]); }
+}
+
+function renderTraceability(){
+  var rows = [
+    ['REQ-AUTH-1','Authenticate Investigator before access','Process 1.0','Login gate (Auth.login)'],
+    ['REQ-AUTH-2','Generic error on invalid login','Process 1.0','"Invalid credentials." returned'],
+    ['REQ-AUTH-3','Lockout after N failed attempts','Process 1.0','5 attempts -> 30s lockout'],
+    ['REQ-CASE-1','Create case with name/description/timestamp','Process 2.0','openNewCaseModal()'],
+    ['REQ-CASE-2','Retrieve / update / view case status','Process 2.0','renderCases / renderCaseDetail'],
+    ['REQ-CASE-3','Every evidence linked to one case','Process 3.0','caseId on every D3 record'],
+    ['REQ-EVID-1','Accept File / URL / Email / Image','Process 3.0','openUploadModal() type selector'],
+    ['REQ-EVID-2','Persist with case + immutable timestamp','Process 3.0','uploadedAt on D3 record'],
+    ['REQ-EVID-3','Validate formats + max size','Process 3.0','CONFIG.MAX_UPLOAD_MB = 25'],
+    ['REQ-EVID-4','Preserve original unmodified','Process 3.0','SHA-256 captured, bytes read-only'],
+    ['REQ-ANLY-1','Route by artifact type','Process 4.0','analyzeFile / analyzeUrl / analyzeEmail'],
+    ['REQ-ANLY-2','Threat detection in files','Process 4.1.1','PE parser + entropy + API chains + IOC'],
+    ['REQ-ANLY-3','Metadata extraction','Process 4.4','SHA-256, size, MIME, image dimensions'],
+    ['REQ-ANLY-4','Consolidated risk score','Process 4.5','generateRiskScore() capped at 100'],
+    ['REQ-ANLY-5','Persist analysis linked to evidence','Process 4.6','D4 record with evidenceId'],
+    ['REQ-URL-1..6','URL sub-analyses 4.2.1-4.2.6','Process 4.2','analyzeUrl() returns 6 fields'],
+    ['REQ-RPT-1','Generate investigation report','Process 5.0','buildReport()'],
+    ['REQ-RPT-2','Persist report linked to case','Process 5.0','D5 record with caseId'],
+    ['REQ-RPT-3','Present result + report + case status','Process 5.0','Case detail + Reports page'],
+    ['REQ-RPT-4','Export report','Process 5.0','downloadReport() -> HTML file']
+  ];
+  var html = '<h2 class="page-title">SRS Traceability Matrix</h2>' +
+    '<div class="page-sub">Every functional requirement mapped to its DFD process and implementation</div>' +
+    '<div class="card" style="padding:0"><table><thead><tr><th>Requirement</th><th>Description</th><th>DFD Process</th><th>Implementation</th></tr></thead><tbody>';
+  for(var i=0;i<rows.length;i++){
+    var r = rows[i];
+    html += '<tr><td><code>'+r[0]+'</code></td><td>'+r[1]+'</td>' +
+      '<td><span class="badge b-info">'+r[2]+'</span></td><td style="color:var(--muted)">'+r[3]+'</td></tr>';
+  }
+  html += '</tbody></table></div>';
+  document.getElementById('main').innerHTML = html;
+}
+
+/* ==================== MODALS ================================ */
+function openNewCaseModal(){
+  modal.innerHTML = '<h3>Create New Case - Process 2.0</h3>' +
+    '<label>Case Name</label><input id="nc-name" placeholder="e.g. Phishing Campaign Investigation" />' +
+    '<label>Description</label><textarea id="nc-desc" rows="3" placeholder="Brief description of the investigation"></textarea>' +
+    '<div class="modal-actions"><button class="btn-ghost" id="nc-cancel">Cancel</button>' +
+    '<button class="btn-primary" id="nc-save">Create Case</button></div>';
+  overlay.classList.add('active');
+  document.getElementById('nc-cancel').onclick = closeModal;
+  document.getElementById('nc-save').onclick = function(){
+    var name = document.getElementById('nc-name').value.trim();
+    if(!name){ toast('Case name is required'); return; }
+    var c = { id:uid('CASE'), name:name, description:document.getElementById('nc-desc').value.trim(),
+              status:'Open', created:new Date().toISOString(),
+              createdBy:Auth.current()?Auth.current().username:'unknown' };
+    var all = DB.cases(); all.push(c); DB.saveCases(all);
+    closeModal(); toast('Case created'); navigate('case', c.id);
+  };
+}
+
+function openUploadModal(caseId){
+  modal.innerHTML = '<h3>Upload Evidence - Process 3.0</h3>' +
+    '<label>Evidence Type</label><select id="up-type">' +
+      '<option value="file">File (any)</option>' +
+      '<option value="image">Image</option>' +
+      '<option value="url">URL</option>' +
+      '<option value="email">Email (.eml file or pasted text)</option></select>' +
+    '<div id="up-file-wrap"><label>Select File</label><input type="file" id="up-file" />' +
+      '<div style="color:var(--muted);font-size:12px;margin-top:6px">Max '+CONFIG.MAX_UPLOAD_MB+' MB</div>' +
+      '<div id="up-sample" style="margin-top:12px"><button class="btn-link" id="up-load-sample" type="button">Or paste a sample email to test</button></div></div>' +
+    '<div id="up-text-wrap" style="display:none"><label id="up-text-lbl">Paste URL</label>' +
+      '<textarea id="up-text" rows="8" placeholder="https://..."></textarea></div>' +
+    '<div class="modal-actions"><button class="btn-ghost" id="up-cancel">Cancel</button>' +
+    '<button class="btn-primary" id="up-save">Upload &amp; Analyse</button></div>';
+  overlay.classList.add('active');
+  document.getElementById('up-cancel').onclick = closeModal;
+  var typeSel = document.getElementById('up-type');
+  typeSel.onchange = function(){
+    var isText = typeSel.value === 'url' || typeSel.value === 'email';
+    document.getElementById('up-file-wrap').style.display = isText ? 'none' : 'block';
+    document.getElementById('up-text-wrap').style.display = isText ? 'block' : 'none';
+    document.getElementById('up-text-lbl').textContent =
+      typeSel.value === 'url' ? 'URL to analyse' : 'Raw email content (headers + body)';
+    if(typeSel.value === 'email'){
+      document.getElementById('up-file-wrap').style.display = 'block';
+      document.getElementById('up-text-wrap').style.display = 'block';
+    }
+    if(typeSel.value === 'url' || typeSel.value === 'file' || typeSel.value === 'image'){
+      document.getElementById('up-file-wrap').style.display = (typeSel.value === 'url') ? 'none' : 'block';
+    }
+  };
+  var sampleBtn = document.getElementById('up-load-sample');
+  if(sampleBtn) sampleBtn.onclick = function(){
+    typeSel.value = 'email';
+    typeSel.onchange();
+    document.getElementById('up-text').value =
+      'From: "PayPal Security" <security@paypa1-verify.tk>\n' +
+      'Reply-To: recovery@temp-mail.xyz\n' +
+      'Return-Path: <bounce@spam-relay.ru>\n' +
+      'Subject: URGENT: Your account has been suspended - verify immediately\n' +
+      'Authentication-Results: spf=fail dkim=fail dmarc=fail\n' +
+      'Received: from unknown (unknown [185.220.101.45]) by mx1.example.com\n' +
+      'Received: from relay2.spam-relay.ru ([185.220.101.45]) by mx2.example.com\n' +
+      'Received: from mail.spam-relay.ru ([185.220.101.45]) by mx3.example.com\n' +
+      'Received: from smtp.spam-relay.ru ([185.220.101.45]) by mx4.example.com\n' +
+      'Received: from localhost ([185.220.101.45]) by mx5.example.com\n' +
+      'Received: from bot.spam-relay.ru ([185.220.101.45]) by mx6.example.com\n' +
+      'Received: from node7.spam-relay.ru ([185.220.101.45]) by mx7.example.com\n' +
+      '\n' +
+      'Dear Customer,\n\n' +
+      'We detected unusual activity on your account. To prevent permanent suspension, please verify your account ' +
+      'and confirm your password immediately by clicking the link below:\n\n' +
+      '  http://paypal.secure-login-verify-account.tk/confirm?id=abc123&redirect=http://evil-c2.net/drop\n\n' +
+      'If you do not verify your account within 24 hours, access will be permanently locked.\n\n' +
+      'A wire transfer of $1,499.00 will be processed unless you confirm.\n\n' +
+      'Sincerely,\nPayPal Security Team';
+    toast('Sample phishing email loaded');
+  };
+  document.getElementById('up-save').onclick = function(){
+    var type = typeSel.value, btn = document.getElementById('up-save');
+    btn.disabled = true; btn.textContent = 'Analysing...';
+    function fail(msg){ toast(msg); btn.disabled = false; btn.textContent = 'Upload & Analyse'; }
+    var f = document.getElementById('up-file').files[0];
+    var textVal = document.getElementById('up-text') ? document.getElementById('up-text').value.trim() : '';
+
+    if(type === 'url' || (type === 'email' && !f && textVal)){
+      if(!textVal){ fail('Please paste content'); return; }
+      var name = type === 'url' ? textVal : ('Email-' + Date.now() + '.eml');
+      var size = new Blob([textVal]).size;
+      var mime = type === 'url' ? 'text/uri-list' : 'message/rfc822';
+      var bytes = new TextEncoder().encode(textVal);
+      persistAndAnalyze(caseId, type, name, size, mime, bytes, textVal, null, btn);
+      return;
+    }
+    if(!f){ fail('Please choose a file or paste content'); return; }
+    if(f.size > CONFIG.MAX_UPLOAD_MB * 1024 * 1024){ fail('File exceeds '+CONFIG.MAX_UPLOAD_MB+' MB limit'); return; }
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var bytes = new Uint8Array(ev.target.result);
+      var ext = (f.name.split('.').pop() || '').toLowerCase();
+      var actualType = type;
+      if(type === 'file' && IMAGE_EXT.indexOf(ext) >= 0) actualType = 'image';
+      if(type === 'file' && ext === 'eml') actualType = 'email';
+      var text = isTextLike(bytes) ? new TextDecoder('utf-8').decode(bytes) : null;
+      persistAndAnalyze(caseId, actualType, f.name, f.size, f.type || 'application/octet-stream', bytes, text, f, btn);
+    };
+    reader.onerror = function(){ fail('Failed to read file'); };
+    reader.readAsArrayBuffer(f);
+  };
+}
+
+function persistAndAnalyze(caseId, type, name, size, mime, bytes, text, fileObj, btn){
+  sha256(bytes, function(hash){
+    var evidence = { id:uid('EV'), caseId:caseId, name:name, size:size, mime:mime, type:type,
+                     sha256:hash, uploadedAt:new Date().toISOString(),
+                     uploadedBy:Auth.current()?Auth.current().username:'unknown' };
+    var evAll = DB.evidence(); evAll.push(evidence); DB.saveEvidence(evAll);
+    prepareAnalysisResult(evidence, bytes, text, fileObj, function(analysis){
+      var anAll = DB.analysis(); anAll.push(analysis); DB.saveAnalysis(anAll);
+      closeModal();
+      toast('Analysis complete - '+analysis.verdict+' ('+analysis.riskScore+'/100)');
+      navigate('case', caseId);
+    });
+  });
+}
+
+function showAnalysis(analysisId){
+  var a = null, allAn = DB.analysis();
+  for(var i=0;i<allAn.length;i++) if(allAn[i].id === analysisId){ a = allAn[i]; break; }
+  if(!a) return;
+  var ev = null, allEv = DB.evidence();
+  for(var e=0;e<allEv.length;e++) if(allEv[e].id === a.evidenceId){ ev = allEv[e]; break; }
+
+  var html = '<h3>Analysis Result - Process 4.6</h3>' +
+    '<div class="row-flex" style="margin-bottom:14px">' + riskBadge(a.riskLevel) +
+      '<b style="font-size:22px">'+a.riskScore+'<span style="color:var(--muted);font-size:14px">/100</span></b>' +
+      '<span class="badge b-info">'+a.verdict+'</span><div class="spacer"></div>' +
+      '<span style="color:var(--muted);font-size:12px">'+fmtDate(a.processedAt)+'</span></div>' +
+    '<div class="score-bar"><span>0</span><div class="track"><div class="fill" style="width:'+a.riskScore+'%;background:'+riskColor(a.riskLevel)+'"></div></div><span>100</span></div>' +
+    '<div class="sec-title">Evidence</div>' +
+    '<div class="kv"><div class="k">Name</div><div class="v">'+esc(ev?ev.name:'-')+'</div>' +
+      '<div class="k">Type</div><div class="v">'+(ev?ev.type:'-')+'</div>' +
+      '<div class="k">Size</div><div class="v">'+(ev?humanSize(ev.size):'-')+'</div>' +
+      '<div class="k">SHA-256</div><div class="v">'+a.metadata.sha256+'</div>' +
+      (a.metadata.width?'<div class="k">Dimensions</div><div class="v">'+a.metadata.width+' x '+a.metadata.height+'</div>':'') +
+    '</div>';
+
+  if(a.urlDetail){
+    html += '<div class="sec-title">URL Analysis (Processes 4.2.1 - 4.2.6)</div><div class="kv">' +
+      '<div class="k">4.2.1 Syntax</div><div class="v">'+a.urlDetail.syntax+'</div>' +
+      '<div class="k">4.2.2 Reputation</div><div class="v">'+a.urlDetail.reputation+'</div>' +
+      '<div class="k">4.2.3 Blacklist</div><div class="v">'+a.urlDetail.blacklist+'</div>' +
+      '<div class="k">4.2.4 Domain</div><div class="v">'+a.urlDetail.domain+'</div>' +
+      '<div class="k">4.2.5 Threat Intel</div><div class="v">'+a.urlDetail.threatIntel+'</div>' +
+      '<div class="k">4.2.6 Verdict</div><div class="v">'+a.urlDetail.verdict+' ('+a.urlDetail.score+'/100)</div></div>';
+  }
+  if(a.emailDetail){
+    html += '<div class="sec-title">Email Headers</div><div class="kv">' +
+      '<div class="k">From</div><div class="v">'+esc(a.emailDetail.from||'-')+'</div>' +
+      '<div class="k">Reply-To</div><div class="v">'+esc(a.emailDetail.replyTo||'-')+'</div>' +
+      '<div class="k">Return-Path</div><div class="v">'+esc(a.emailDetail.returnPath||'-')+'</div>' +
+      '<div class="k">Subject</div><div class="v">'+esc(a.emailDetail.subject||'-')+'</div>' +
+      '<div class="k">Received hops</div><div class="v">'+(a.emailDetail.receivedHops||0)+'</div>' +
+      '<div class="k">Links found</div><div class="v">'+a.emailDetail.links+'</div>' +
+      (a.emailDetail.attachments && a.emailDetail.attachments.length ?
+        '<div class="k">Attachments</div><div class="v" style="color:var(--high)">'+esc(a.emailDetail.attachments.join(', '))+'</div>' : '') +
+      (a.emailDetail.authResults ?
+        '<div class="k">Auth-Results</div><div class="v">'+esc(a.emailDetail.authResults)+'</div>' : '') +
+    '</div>';
+  }
+
+  html += '<div class="sec-title">Findings ('+a.findings.length+')</div>';
+  if(a.findings.length === 0){
+    html += '<div class="card empty" style="padding:24px;border-color:var(--low)">' +
+      'No indicators of compromise were detected. This evidence is considered <b style="color:var(--low)">clean</b>.</div>';
+  } else {
+    // Sort by severity
+    var order = { high:0, medium:1, low:2 };
+    a.findings.sort(function(x,y){ return (order[x.severity]||9) - (order[y.severity]||9); });
+    for(var f=0;f<a.findings.length;f++){
+      var fd = a.findings[f];
+      html += '<div class="finding '+fd.severity+'"><div class="t">' +
+        '<span>'+esc(fd.title)+'</span>' +
+        (fd.points ? '<span class="pts">+'+fd.points+' pts</span>' : '') + '</div>' +
+        '<div class="d">'+esc(fd.detail)+'</div>';
+      if(fd.snippet){
+        html += '<div class="ev">'+renderSnippet(fd.snippet)+'</div>';
+      }
+      html += '</div>';
+    }
+  }
+  html += '<div class="modal-actions"><button class="btn-ghost" id="an-close">Close</button></div>';
+  modal.innerHTML = html;
+  overlay.classList.add('active');
+  document.getElementById('an-close').onclick = closeModal;
+}
+
+function generateReport(caseId){
+  var c = null, cases = DB.cases();
+  for(var i=0;i<cases.length;i++) if(cases[i].id === caseId){ c = cases[i]; break; }
+  if(!c) return;
+  var ev = [], an = [], allEv = DB.evidence(), allAn = DB.analysis();
+  for(var e=0;e<allEv.length;e++) if(allEv[e].caseId === caseId) ev.push(allEv[e]);
+  for(var a=0;a<allAn.length;a++) if(allAn[a].caseId === caseId) an.push(allAn[a]);
+  if(an.length === 0){ toast('No analysed evidence to report on'); return; }
+  var rpt = buildReport(c, ev, an);
+  var all = DB.reports(); all.push(rpt); DB.saveReports(all);
+  toast('Report generated'); viewReport(rpt.id);
+}
+window.generateReport = generateReport;
+
+function viewReport(id){
+  var r = null, all = DB.reports();
+  for(var i=0;i<all.length;i++) if(all[i].id === id){ r = all[i]; break; }
+  if(!r) return;
+  var html = '<h3>Investigation Report - Process 5.0</h3><div class="kv">' +
+    '<div class="k">Report ID</div><div class="v">'+r.id+'</div>' +
+    '<div class="k">Case</div><div class="v">'+esc(r.caseName)+' ('+r.caseId+')</div>' +
+    '<div class="k">Generated</div><div class="v">'+fmtDate(r.generatedAt)+'</div>' +
+    '<div class="k">Evidence items</div><div class="v">'+r.summary.totalEvidence+'</div>' +
+    '<div class="k">Threats / Suspicious / Clean</div>' +
+    '<div class="v"><span style="color:var(--high)">'+r.summary.threats+'</span> / ' +
+    '<span style="color:var(--med)">'+r.summary.suspicious+'</span> / ' +
+    '<span style="color:var(--low)">'+r.summary.clean+'</span></div>' +
+    '<div class="k">Highest risk score</div><div class="v">'+r.summary.highestScore+'/100</div></div>' +
+    '<div class="sec-title">Per-evidence findings</div>';
+  for(var it=0; it<r.items.length; it++){
+    var item = r.items[it];
+    html += '<div class="card" style="margin-bottom:10px;padding:14px"><div class="row-flex">' +
+      '<b>'+esc(item.evidenceName)+'</b><span class="badge b-info">'+item.type+'</span>' +
+      riskBadge(item.level) + '<span style="color:var(--muted);font-size:12.5px">'+item.score+'/100 - '+item.verdict+'</span></div>';
+    if(item.findings.length === 0){
+      html += '<div style="color:var(--low);font-size:13px;margin-top:6px">No indicators detected.</div>';
+    } else {
+      html += '<ul style="margin:8px 0 0 18px;color:var(--muted);font-size:13px">';
+      for(var f=0;f<item.findings.length;f++){
+        html += '<li><b>'+esc(item.findings[f].title)+'</b> - '+esc(item.findings[f].detail)+'</li>';
+      }
+      html += '</ul>';
+    }
+    html += '</div>';
+  }
+  html += '<div class="modal-actions"><button class="btn-ghost" id="rp-close">Close</button>' +
+    '<button class="btn-primary" id="rp-dl">Export Report</button></div>';
+  modal.innerHTML = html;
+  overlay.classList.add('active');
+  document.getElementById('rp-close').onclick = closeModal;
+  document.getElementById('rp-dl').onclick = function(){ downloadReport(r.id); };
+}
+window.viewReport = viewReport;
+
+function downloadReport(id){
+  var r = null, all = DB.reports();
+  for(var i=0;i<all.length;i++) if(all[i].id === id){ r = all[i]; break; }
+  if(!r) return;
+  var itemsHtml = '';
+  for(var it=0; it<r.items.length; it++){
+    var item = r.items[it];
+    itemsHtml += '<div style="border:1px solid #ddd;border-radius:6px;padding:12px;margin-bottom:10px">' +
+      '<b>'+esc(item.evidenceName)+'</b> - <span class="'+item.level+'">'+item.verdict+' ('+item.score+'/100)</span>';
+    if(item.findings.length === 0){
+      itemsHtml += '<p style="color:#1e8449;font-size:13px">No indicators of compromise detected.</p>';
+    } else {
+      itemsHtml += '<ul>';
+      for(var f=0;f<item.findings.length;f++){
+        var fd = item.findings[f];
+        itemsHtml += '<li><b>'+esc(fd.title)+'</b> - '+esc(fd.detail);
+        if(fd.snippet) itemsHtml += ' <br/><code style="background:#f5f5f5;padding:2px 6px;border-radius:3px">' +
+          esc(fd.snippet.before + '[' + fd.snippet.match + ']' + fd.snippet.after) + '</code>';
+        itemsHtml += '</li>';
+      }
+      itemsHtml += '</ul>';
+    }
+    itemsHtml += '</div>';
+  }
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Report '+r.id+'</title>' +
+    '<style>body{font-family:Segoe UI,Arial,sans-serif;max-width:820px;margin:40px auto;padding:0 24px;color:#111}' +
+    'h1{font-size:22px;border-bottom:3px solid #2f81f7;padding-bottom:8px}' +
+    'h2{font-size:15px;margin-top:26px;text-transform:uppercase;letter-spacing:.05em;color:#555}' +
+    'table{width:100%;border-collapse:collapse;margin-top:8px}' +
+    'th,td{border:1px solid #ddd;padding:8px 10px;text-align:left;font-size:13px}' +
+    'th{background:#f4f6f9}.high{color:#c0392b;font-weight:700}.medium{color:#b8860b;font-weight:700}.low{color:#1e8449;font-weight:700}' +
+    'ul{margin:6px 0 0 20px}li{font-size:13px;color:#444;margin-bottom:6px}.meta{color:#666;font-size:12px}</style></head><body>' +
+    '<h1>AI Digital Forensics &amp; Investigation Report</h1>' +
+    '<p class="meta"><b>Report ID:</b> '+r.id+' &nbsp;|&nbsp; <b>Case:</b> '+esc(r.caseName)+' ('+r.caseId+')<br/>' +
+    '<b>Generated:</b> '+fmtDate(r.generatedAt)+'</p>' +
+    '<h2>Executive Summary</h2>' +
+    '<table><tr><th>Total Evidence</th><th>Threats</th><th>Suspicious</th><th>Clean</th><th>Highest Risk Score</th></tr>' +
+    '<tr><td>'+r.summary.totalEvidence+'</td><td class="high">'+r.summary.threats+'</td>' +
+    '<td class="medium">'+r.summary.suspicious+'</td><td class="low">'+r.summary.clean+'</td>' +
+    '<td>'+r.summary.highestScore+'/100</td></tr></table>' +
+    '<h2>Evidence Analysis</h2>' + itemsHtml +
+    '<p class="meta" style="margin-top:30px">Generated by AI Powered Digital Forensics &amp; Investigation Platform v1.0</p>' +
+    '</body></html>';
+  var blob = new Blob([html], {type:'text/html'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'InvestigationReport_'+r.id+'.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  toast('Report exported');
+}
+window.downloadReport = downloadReport;
+
+/* ==================== DEMO SEED ============================= */
+function seedDemoData(){
+  if(DB.cases().length){ toast('Data already exists'); return; }
+  var c1 = { id:uid('CASE'), name:'Phishing Email Investigation',
+    description:'Suspected credential-harvesting campaign targeting staff.', status:'Open',
+    created:new Date().toISOString(), createdBy:'investigator' };
+  var c2 = { id:uid('CASE'), name:'Suspicious File Triage',
+    description:'Unknown executable submitted by user.', status:'Open',
+    created:new Date().toISOString(), createdBy:'investigator' };
+  DB.saveCases([c1, c2]);
+
+  var cleanText = 'Quarterly financial summary. All figures reconciled. No anomalies found.';
+  var cleanBytes = new TextEncoder().encode(cleanText);
+  var urlText = 'http://185.220.101.45:8080/xmlrpc.php';
+  var urlBytes = new TextEncoder().encode(urlText);
+  var badText = 'powershell -enc SQBFAFgA invoke-expression(meterpreter) WriteProcessMemory CreateRemoteThread URLDownloadToFile WinExec HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run vssadmin delete shadows';
+  var badBytes = new TextEncoder().encode(badText);
+  var emailText = 'From: "PayPal Security" <security@paypa1-verify.tk>\n' +
+    'Reply-To: recovery@temp-mail.xyz\n' +
+    'Return-Path: <bounce@spam-relay.ru>\n' +
+    'Subject: URGENT: Your account has been suspended - verify immediately\n' +
+    'Authentication-Results: spf=fail dkim=fail dmarc=fail\n' +
+    '\n' +
+    'Dear Customer, we detected unusual activity. Please verify your account and confirm your password immediately:\n' +
+    'http://paypal.secure-login-verify-account.tk/confirm?redirect=http://evil-c2.net/drop\n';
+  var emailBytes = new TextEncoder().encode(emailText);
+
+  var queue = [
+    { caseId:c1.id, type:'file',  name:'financial_summary.txt', mime:'text/plain', bytes:cleanBytes, text:cleanText },
+    { caseId:c1.id, type:'url',   name:urlText, mime:'text/uri-list', bytes:urlBytes, text:urlText },
+    { caseId:c1.id, type:'email', name:'sample-phish.eml', mime:'message/rfc822', bytes:emailBytes, text:emailText },
+    { caseId:c2.id, type:'file',  name:'payload.ps1', mime:'text/plain', bytes:badBytes, text:badText }
+  ];
+  var evAll = DB.evidence(), anAll = DB.analysis(), pending = queue.length;
+  queue.forEach(function(q){
+    sha256(q.bytes, function(hash){
+      var ev = { id:uid('EV'), caseId:q.caseId, name:q.name, size:q.bytes.length,
+                 mime:q.mime, type:q.type, sha256:hash,
+                 uploadedAt:new Date().toISOString(), uploadedBy:'investigator' };
+      evAll.push(ev);
+      prepareAnalysisResult(ev, q.bytes, q.text, null, function(an){
+        anAll.push(an);
+        pending--;
+        if(pending === 0){
+          DB.saveEvidence(evAll); DB.saveAnalysis(anAll);
+          toast('Sample data loaded'); navigate('dashboard');
+        }
+      });
+    });
+  });
+}
+window.seedDemoData = seedDemoData;
+
+/* ==================== BOOTSTRAP ============================= */
+function showApp(user){
+  document.getElementById('login-screen').classList.remove('active');
+  document.getElementById('app').classList.add('active');
+  document.getElementById('hdr-user').textContent = user.name + ' - ' + user.role;
+  navigate('dashboard');
+}
+
+function bootstrap(){
+  console.log('[DFI] localStorage:', HAS_LS, '| sessionStorage:', HAS_SS);
+
+  // Storage status
+  var status = document.getElementById('storage-status');
+  if(status){
+    var ok = HAS_LS && HAS_SS;
+    status.style.color = ok ? 'var(--low)' : 'var(--med)';
+    status.textContent = ok ? '\u25CF Persistent storage: OK — accounts saved to this computer'
+                            : '\u25CF Persistent storage blocked — in-memory mode';
+  }
+
+  // Tabs
+  var tabLogin = document.getElementById('tab-login');
+  var tabReg = document.getElementById('tab-register');
+  var formLogin = document.getElementById('login-form');
+  var formReg = document.getElementById('register-form');
+  tabLogin.onclick = function(){
+    tabLogin.classList.add('active'); tabReg.classList.remove('active');
+    formLogin.style.display = 'block'; formReg.style.display = 'none';
+  };
+  tabReg.onclick = function(){
+    tabReg.classList.add('active'); tabLogin.classList.remove('active');
+    formLogin.style.display = 'none'; formReg.style.display = 'block';
+  };
+
+  // Login
+  formLogin.onsubmit = function(ev){
+    ev.preventDefault();
+    var u = document.getElementById('login-user').value;
+    var p = document.getElementById('login-pass').value;
+    var r = Auth.login(u, p);
+    if(r.ok){ document.getElementById('login-error').textContent=''; showApp(r.user); }
+    else document.getElementById('login-error').textContent = r.msg;
+  };
+
+  // Register
+  formReg.onsubmit = function(ev){
+    ev.preventDefault();
+    var u = document.getElementById('reg-user').value;
+    var n = document.getElementById('reg-name').value;
+    var p1 = document.getElementById('reg-pass').value;
+    var p2 = document.getElementById('reg-pass2').value;
+    var err = document.getElementById('reg-error');
+    var ok = document.getElementById('reg-success');
+    err.textContent = ''; ok.textContent = '';
+    var r = Auth.register(u, n, p1, p2);
+    if(!r.ok){ err.textContent = r.msg; return; }
+    ok.textContent = 'Account created. Signing you in...';
+    // Auto sign-in
+    var li = Auth.login(u, p1);
+    if(li.ok) setTimeout(function(){ showApp(li.user); }, 700);
+    else { document.getElementById('tab-login').click(); document.getElementById('login-error').textContent = 'Please sign in.'; }
+  };
+
+  Auth.seed();
+
+  var lo = document.getElementById('logout-btn');
+  if(lo) lo.onclick = function(){ Auth.logout(); location.reload(); };
+
+  var links = document.querySelectorAll('aside a');
+  for(var i=0;i<links.length;i++){ (function(a){ a.onclick=function(){ navigate(a.dataset.route); }; })(links[i]); }
+
+  if(overlay) overlay.addEventListener('click', function(e){ if(e.target === overlay) closeModal(); });
+
+  // Auto-signin if session exists
+  var existing = Auth.current();
+  if(existing) showApp(existing);
+
+  // PWA install prompt
+  window.addEventListener('beforeinstallprompt', function(ev){
+    ev.preventDefault();
+    window.__deferredInstallPrompt = ev;
+    if(document.getElementById('install-banner-slot')) renderInstallBanner();
+  });
+
+  console.log('[DFI] Bootstrap complete.');
+}
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap);
+else bootstrap();
+
+})();
+</script>
+</body>
+</html>
