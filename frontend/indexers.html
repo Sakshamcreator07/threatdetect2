@@ -1771,6 +1771,11 @@ function openNewCaseModal(){
 var UPLOAD_FILE = null;
 
 function openUploadModal(caseId){
+  var targetCase = DB.cases().find(function(c){ return c.id === caseId; });
+  if (!targetCase || targetCase.status !== 'Open') {
+    toast('Reopen this case before adding evidence.', 'error');
+    return;
+  }
   UPLOAD_FILE = null;
   modal.innerHTML = '<h3>Upload evidence</h3>' +
     '<label>Type</label>' +
