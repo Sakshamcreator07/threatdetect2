@@ -1244,10 +1244,11 @@ function analyzeUrl(url){
   }
 
   /* ---- Potentially misleading domain structure ---- */
-  var otherTlds=['.com','.net','.org','.gov','.edu','.co'];
+  var otherTlds=['.com','.net','.org','.gov','.edu'];
   for(var o=0;o<otherTlds.length;o++){
     var ot=otherTlds[o];
-    if(host.indexOf(ot)>=0 && host.indexOf(ot)!==host.length-ot.length && tld!==ot){
+    // Require a full intermediary label such as ".com.evil", not the ".co" prefix inside ".com".
+    if(host.indexOf(ot+'.')>=0 && tld!==ot){
       score+=15;
       findings.push(mkFinding('medium','Potentially misleading domain structure',
         'The hostname contains "'+ot+'" before the final suffix. Check from right to left; this heuristic is not a threat confirmation.',
@@ -1325,7 +1326,7 @@ function analyzeUrl(url){
   }
   score=Math.max(0,Math.min(score,100));
   out.score=score;
-  out.verdict=listed?'Malicious (local-list match)':score>=15?'Suspicious':'No known threat found';
+  out.verdict=listed?'Listed (local demo indicator)':score>=15?'Suspicious':'No known threat found';
   out.reputation=listed?'Local indicator match':score>=15?'Needs review':'No known threat found';
   out.domain=host;
   out.threatIntel=listed?'Matched bundled local demonstration indicator; no live API queried':'No match in bundled local demonstration list; no live API queried';
@@ -1602,13 +1603,15 @@ function prepareAnalysisResult(evidence, bytes, text, fileObj, callback){
 
 /* ==================== REPORT ================================ */
 function buildReport(caseObj, evidenceList, analysisList){
-  var threats=0,suspicious=0,clean=0,incomplete=0,highest=0;
+  var threats=0,suspicious=0,clean=0,incomplete=0,listedIndicators=0,highest=0;
   for(var i=0;i<analysisList.length;i++){
     var a=analysisList[i];
     if(a.verdict && /incomplete|unavailable|error/i.test(a.verdict)) incomplete++;
-    else if(a.urlDetail && /^Malicious/.test(a.urlDetail.verdict)) threats++;
-    else if(a.riskLevel==='high') threats++;
-    else if(a.urlDetail && a.urlDetail.verdict==='Suspicious') suspicious++;
+    else if(a.urlDetail){
+      if(a.urlDetail.blacklist==='MATCH (bundled demo list)') listedIndicators++;
+      if(a.urlDetail.verdict==='Suspicious'||a.urlDetail.verdict==='Invalid URL') suspicious++;
+      else if(a.urlDetail.verdict==='No known threat found') clean++;
+    } else if(a.riskLevel==='high') threats++;
     else if(a.riskLevel==='medium') suspicious++;
     else clean++;
     if(a.riskScore>highest)highest=a.riskScore;
@@ -1626,9 +1629,10 @@ function buildReport(caseObj, evidenceList, analysisList){
   return {id:uid('RPT'),caseId:caseObj.id,caseName:caseObj.name,caseDescription:caseObj.description||'',
     caseStatus:caseObj.status||'Unknown',generatedAt:new Date().toISOString(),reportVersion:'TraceLens investigation report v1.1',
     summary:{totalEvidence:evidenceList.length,analysed:analysisList.length,threats:threats,suspicious:suspicious,
-      clean:clean,incomplete:incomplete,highestScore:highest},
+      clean:clean,incomplete:incomplete,listedIndicators:listedIndicators,highestScore:highest},
     limitations:[
       'URL reputation uses a small bundled demonstration indicator list; no live threat-intelligence API was queried.',
+      'A local demo-indicator match is not equivalent to independent or live confirmation that a domain is malicious.',
       'Heuristic indicators are triage signals, not proof of malicious activity.',
       'No known threat found means only that the checks performed found no known indicator; it does not guarantee safety.',
       'Local browser storage is used by this prototype and is not a tamper-proof forensic evidence store.'
@@ -2100,8 +2104,9 @@ function viewReport(id){
     '<div class="k">Case</div><div class="v">'+esc(r.caseName)+' ('+r.caseId+')</div>' +
     '<div class="k">Generated</div><div class="v">'+fmtDate(r.generatedAt)+'</div>' +
     '<div class="k">Evidence items</div><div class="v">'+r.summary.totalEvidence+'</div>' +
-    '<div class="k">Threats / Suspicious / Clean</div>' +
+    '<div class="k">High risk / Listed local indicators / Suspicious / No known threat</div>' +
     '<div class="v"><span style="color:var(--high)">'+r.summary.threats+'</span> / ' +
+    '<span style="color:var(--med)">'+(r.summary.listedIndicators||0)+'</span> / ' +
     '<span style="color:var(--med)">'+r.summary.suspicious+'</span> / ' +
     '<span style="color:var(--low)">'+r.summary.clean+'</span></div>' +
     '<div class="k">Highest risk score</div><div class="v">'+r.summary.highestScore+'/100</div></div>' +
@@ -2205,8 +2210,8 @@ function downloadReport(id){
     '</style></head><body><div class="print-bar no-print"><button onclick="window.print()">Print / Save as PDF</button> <span class="meta">In the print dialog, choose “Save as PDF”.</span></div>'+
     '<header><div class="meta">TRACELENS · DIGITAL FORENSICS</div><h1>Investigation Report</h1><p class="meta">Report ID: '+reportEsc(r.id)+' · Generated: '+dateText(r.generatedAt)+'</p></header>'+
     '<h2>Case Information</h2><dl><dt>Case</dt><dd>'+reportEsc(r.caseName||'Unknown')+'</dd><dt>Case ID</dt><dd class="mono">'+reportEsc(r.caseId||'Unavailable')+'</dd><dt>Status</dt><dd>'+reportEsc(r.caseStatus||'Unknown')+'</dd><dt>Description</dt><dd>'+reportEsc(r.caseDescription||'Not provided')+'</dd></dl>'+
-    '<h2>Executive Summary</h2><div class="summary"><div class="metric"><b>'+reportEsc(summary.totalEvidence||0)+'</b>Total evidence</div><div class="metric"><b>'+reportEsc(summary.threats||0)+'</b>Malicious / local indicator</div><div class="metric"><b>'+reportEsc(summary.suspicious||0)+'</b>Suspicious</div><div class="metric"><b>'+reportEsc(summary.highestScore||0)+'/100</b>Highest heuristic score</div></div>'+
-    '<p class="notice">Verdicts are triage results based on evidence and sources actually checked. “No known threat found” is not a guarantee that an artifact is safe.</p>'+
+    '<h2>Executive Summary</h2><div class="summary"><div class="metric"><b>'+reportEsc(summary.totalEvidence||0)+'</b>Total evidence</div><div class="metric"><b>'+reportEsc(summary.threats||0)+'</b>High-risk artifacts</div><div class="metric"><b>'+reportEsc(summary.listedIndicators||0)+'</b>Listed local indicators</div><div class="metric"><b>'+reportEsc(summary.suspicious||0)+'</b>Suspicious</div><div class="metric"><b>'+reportEsc(summary.highestScore||0)+'/100</b>Highest heuristic score</div></div>'+
+    '<p class="notice">Verdicts are triage results based on evidence and sources actually checked. A match in the bundled demo list is not independent confirmation of malicious activity. “No known threat found” is not a guarantee that an artifact is safe.</p>'+
     '<h2>Evidence Findings</h2>'+itemsHtml+'<h2>Limitations and Scan Scope</h2><ul>'+limitations+'</ul>'+
     '<h2>Recommended Next Steps</h2><ol><li>Validate potential malicious indicators against current trusted threat-intelligence sources.</li><li>Preserve original evidence and record its SHA-256 hash and acquisition context.</li><li>Escalate high-risk findings for isolated sandbox or analyst review before taking action.</li><li>Document uncompleted checks and collect additional evidence where needed.</li></ol>'+
     '<footer>TraceLens · Generated from locally saved scan results. No findings or metrics were added beyond the saved analysis.</footer></body></html>';
